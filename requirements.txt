@@ -1,0 +1,7 @@
+flask==2.3.2
+aiohttp==3.8.4
+multidict==6.0.4
+yarl==1.9.2
+gunicorn==20.1.0
+
+requests==2.31.0
