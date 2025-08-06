@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Encabezado responsive -->
+    <div class="text-center mb-4 mb-md-5">
+        <h1 class="display-5 fw-bold mb-2 mb-md-3">¡Bienvenido, {{ user.name }}!</h1>
+        <div class="progress mb-3" style="height: 20px; border-radius: 10px;">
+            <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                 style="width: {{ (user.completed_lessons|length / lessons|length * 100) if lessons|length > 0 else 0 }}%">
+                <span class="progress-text">{{ ((user.completed_lessons|length / lessons|length * 100) if lessons|length > 0 else 0)|round(1) }}%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lecciones por categoría -->
+    {% for category in categories %}
+    <section class="mb-4 mb-md-5 category-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 mb-0">
+                <i class="fas fa-{{ category_icons[category] }} me-2"></i>{{ category }}
+            </h2>
+            <div class="slider-controls d-none d-md-flex">
+                <button class="btn btn-sm btn-outline-primary prev-slide">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-primary next-slide ms-2">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="row flex-nowrap overflow-auto lesson-row py-2" style="scroll-behavior: smooth;">
+            {% for lesson in lessons if lesson.category == category %}
+            <div class="col-10 col-sm-8 col-md-6 col-lg-4 col-xl-3 px-2 mb-3 lesson-col">
+                <div class="card h-100 lesson-card {% if lesson.id in user.completed_lessons %}border-success border-2{% else %}border-primary{% endif %}">
+                    <!-- Imagen responsive -->
+                    <div class="card-img-container ratio ratio-16x9">
+                        {% set cover_image = lesson.content|selectattr("type", "equalto", "image")|first or 
+                                           lesson.content|selectattr("type", "equalto", "video_youtube")|first %}
+
+                        {% if cover_image and cover_image.type == "image" and cover_image.url %}
+                            <img src="{{ cover_image.url }}" class="card-img-top" alt="{{ cover_image.alt }}" 
+                                 loading="lazy"
+                                 onerror="this.src='https://source.unsplash.com/random/300x200/?{{ lesson.category|lower }},education'">
+                        {% elif cover_image and cover_image.type == "video_youtube" %}
+                            <img src="https://img.youtube.com/vi/{{ cover_image.youtube_id }}/mqdefault.jpg" 
+                                 class="card-img-top" alt="Miniatura de video"
+                                 loading="lazy"
+                                 onerror="this.src='https://source.unsplash.com/random/300x200/?video,education'">
+                            <div class="video-play-icon">
+                                <i class="fas fa-play-circle"></i>
+                            </div>
+                        {% else %}
+                            <img src="https://source.unsplash.com/random/300x200/?{{ lesson.category|lower }},education" 
+                                 class="card-img-top" alt="Imagen genérica de {{ lesson.category }}"
+                                 loading="lazy">
+                        {% endif %}
+                    </div>
+
+                    <!-- Cuerpo responsive -->
+                    <div class="card-body p-3">
+                        <h5 class="card-title h6 mb-1 mb-md-2">{{ lesson.title }}</h5>
+                        <p class="card-text text-muted small d-none d-sm-block">{{ lesson.description|truncate(80) }}</p>
+                    </div>
+
+                    <!-- Pie responsive -->
+                    <div class="card-footer bg-transparent p-2 p-md-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            {% if lesson.id in user.completed_lessons %}
+                                <span class="badge bg-success rounded-pill small">
+                                    <i class="fas fa-check-circle me-1"></i> Completado
+                                </span>
+                            {% else %}
+                                <span class="badge bg-primary rounded-pill small">
+                                    <i class="fas fa-star me-1"></i> Nuevo
+                                </span>
+                            {% endif %}
+                            <a href="{{ url_for('lesson_detail', lesson_id=lesson.id) }}" 
+                               class="btn btn-sm {% if lesson.id in user.completed_lessons %}btn-outline-success{% else %}btn-primary{% endif %} py-1">
+                                {% if lesson.id in user.completed_lessons %}Repasar{% else %}Comenzar{% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+</div>
+{% endblock %}

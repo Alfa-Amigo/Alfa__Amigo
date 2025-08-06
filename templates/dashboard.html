@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Panel de Control</title>
+</head>
+<body>
+    {% if user %}
+        <h1>Bienvenido, {{ user }}!</h1>
+        <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+        
+        <!-- Ejemplo usando las lecciones -->
+        <h2>Tus lecciones:</h2>
+        <ul>
+        {% for lesson in lessons %}
+            <li>{{ lesson.title }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No has iniciado sesión. <a href="{{ url_for('login') }}">Ingresar</a></p>
+    {% endif %}
+</body>
+</html>

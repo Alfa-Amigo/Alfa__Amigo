@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Cuestionario - {{ lesson.title }}{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    <div class="quiz-header mb-4">
+        <h2><i class="fas fa-{{ lesson.icon }} me-2"></i> {{ lesson.title }}</h2>
+        <p class="text-muted">Demuestra lo que aprendiste</p>
+    </div>
+    
+    <form method="POST">
+        {% for question in lesson.quiz %}
+        <div class="quiz-question mb-4 p-4 bg-white rounded shadow-sm">
+            <h5 class="question-text mb-3">{{ question.question }}</h5>
+            
+            <div class="options-container">
+                {% for option in question.options %}
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" 
+                           name="q{{ question.id }}" id="q{{ question.id }}_{{ loop.index }}" 
+                           value="{{ option }}">
+                    <label class="form-check-label" for="q{{ question.id }}_{{ loop.index }}">
+                        {{ option }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-paper-plane me-2"></i> Enviar respuestas
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

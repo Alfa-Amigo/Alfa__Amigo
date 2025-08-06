@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+            <li class="breadcrumb-item">{{ lesson.category }}</li>
+            <li class="breadcrumb-item active" aria-current="page">{{ lesson.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">
+                <i class="fas fa-{{ lesson.icon }} me-2"></i>{{ lesson.title }}
+            </h2>
+        </div>
+        <div class="card-body">
+            <p class="lead">{{ lesson.description }}</p>
+
+            <div class="lesson-content mt-4">
+                {% for item in lesson.content %}
+                <div class="content-block mb-4 p-3 bg-light rounded">
+                    {% if item.type == "image" %}
+                    <div class="text-center mb-3">
+                        <img src="{{ item.url }}" class="img-fluid rounded" alt="{{ item.alt }}" style="max-height: 300px;">
+                        {% if item.description %}
+                        <p class="text-muted mt-2">{{ item.description }}</p>
+                        {% endif %}
+                    </div>
+                    {% elif item.type == "text" %}
+                    <div class="text-content fs-5">
+                        {{ item.content|safe }}
+                    </div>
+                    {% elif item.type == "video_youtube" %}
+                    <div class="video-container mb-3">
+                        <div class="ratio ratio-16x9">
+                            <iframe 
+                                src="https://www.youtube.com/embed/{{ item.youtube_id }}" 
+                                title="{{ item.description }}" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        {% if item.description %}
+                        <p class="text-muted mt-2">{{ item.description }}</p>
+                        {% endif %}
+                    </div>
+                    {% elif item.type == "interactive" %}
+                    <div class="interactive-content p-3 bg-white rounded border">
+                        <h5><i class="fas fa-hand-pointer me-2"></i>Practica</h5>
+                        <p class="fs-4">{{ item.content }}</p>
+                        
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('quiz', lesson_id=lesson.id) }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-play me-2"></i> Realizar cuestionario
+        </a>
+    </div>
+</div>
+{% endblock %}

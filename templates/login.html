@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-body p-5 text-center">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="mb-4" width="120">
+                <h2 class="mb-4">Bienvenido a AlfaAmigo</h2>
+                <p class="text-muted mb-4">Aprende a tu propio ritmo</p>
+                
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <input type="text" class="form-control form-control-lg" name="username" 
+                               placeholder="Tu nombre" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i> Comenzar
+                    </button>
+                </form>
+                
+                <div class="mt-4">
+                    <p class="text-muted">¿Es tu primera vez aquí? Solo ingresa tu nombre para comenzar.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
