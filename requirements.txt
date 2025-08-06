@@ -1,3 +1,4 @@
-Flask==2.0.1
-python-dotenv==0.19.0
+Flask==2.2.3
+Werkzeug==2.3.7  # Versión específica compatible
 gunicorn==20.1.0
+python-dotenv==0.19.0
