@@ -323,6 +323,7 @@ def initialize():
                 db.execute(
                     "INSERT INTO users (username, password) VALUES (?, ?)",
                     ("admin", generate_password_hash("admin123"))
+                )
                 db.commit()
                 print("Usuario admin creado: admin/admin123")
         except Exception as e:
