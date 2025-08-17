@@ -4,17 +4,46 @@ from functools import wraps
 import sqlite3
 import os
 from datetime import datetime
-from dotenv import load_dotenv
+from pathlib import Path
 
 # Configuración inicial
-load_dotenv()
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'dev_secret_key_123')
-app.config['DATABASE'] = os.path.join(os.path.dirname(__file__), 'app.db')
+app.secret_key = os.environ.get('SECRET_KEY', 'dev_secret_key_123')  # Cambia en producción!
 
-# Cargar lecciones desde JSON
-with open('lessons.json', 'r', encoding='utf-8') as f:
-    LESSONS = json.load(f)
+# Configuración de rutas
+BASE_DIR = Path(__file__).parent
+app.config['DATABASE'] = BASE_DIR / 'app.db'
+
+# Lecciones integradas (backup si no encuentra el JSON)
+DEFAULT_LESSONS = [
+    {
+        "id": 1,
+        "title": "El Abecedario",
+        "description": "Aprende las letras del alfabeto español",
+        "icon": "font",
+        "category": "Lectura",
+        "content": [
+            {"type": "text", "content": "<p>El alfabeto español tiene 27 letras...</p>"},
+            {"type": "image", "url": "/static/images/alfabeto.jpg", "alt": "Abecedario"}
+        ],
+        "quiz": [
+            {
+                "id": 1,
+                "question": "¿Cuál es la primera letra?",
+                "options": ["A", "B", "Z"],
+                "correct_answer": "A"
+            }
+        ]
+    }
+]
+
+# Cargar lecciones desde JSON o usar las por defecto
+try:
+    with open(BASE_DIR / 'lessons.json', 'r', encoding='utf-8') as f:
+        LESSONS = json.load(f)
+except FileNotFoundError:
+    LESSONS = DEFAULT_LESSONS
+    print("⚠️ Usando lecciones por defecto (no se encontró lessons.json)")
 
 CATEGORIES = sorted({lesson['category'] for lesson in LESSONS})
 CATEGORY_ICONS = {
@@ -62,7 +91,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            flash('Por favor inicia sesión para acceder', 'warning')
+            flash('Por favor inicia sesión', 'warning')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -80,19 +109,18 @@ def index():
     db = get_db()
     user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
     
-    # Obtener lecciones completadas
     completed = db.execute(
         'SELECT lesson_id FROM user_lessons WHERE user_id = ? AND completed = 1',
         (session['user_id'],)
     ).fetchall()
-    completed_ids = [row['lesson_id'] for row in completed]
     
     return render_template('index.html',
-                         user=dict(user),
-                         lessons=LESSONS,
-                         categories=CATEGORIES,
-                         category_icons=CATEGORY_ICONS,
-                         user_completed_lessons=completed_ids)
+        user=dict(user),
+        lessons=LESSONS,
+        categories=CATEGORIES,
+        category_icons=CATEGORY_ICONS,
+        user_completed_lessons=[row['lesson_id'] for row in completed]
+    )
 
 @app.route('/lesson/<int:lesson_id>')
 @login_required
@@ -101,7 +129,6 @@ def lesson_detail(lesson_id):
     if not lesson:
         flash('Lección no encontrada', 'danger')
         return redirect(url_for('index'))
-    
     return render_template('lesson_detail.html', lesson=lesson)
 
 @app.route('/quiz/<int:lesson_id>', methods=['GET', 'POST'])
@@ -113,23 +140,19 @@ def quiz(lesson_id):
         return redirect(url_for('index'))
     
     if request.method == 'POST':
-        # Calcular puntaje
-        score = 0
-        for question in lesson['quiz']:
-            user_answer = request.form.get(f'q{question["id"]}')
-            if user_answer == question['correct_answer']:
-                score += 1
+        score = sum(
+            1 for q in lesson['quiz'] 
+            if request.form.get(f'q{q["id"]}') == q['correct_answer']
+        )
         
-        # Guardar progreso
         db = get_db()
         try:
-            db.execute(
-                '''INSERT OR REPLACE INTO user_lessons 
+            db.execute('''
+                INSERT OR REPLACE INTO user_lessons 
                 (user_id, lesson_id, completed, completed_at, score)
-                VALUES (?, ?, 1, datetime('now'), ?)''',
-                (session['user_id'], lesson_id, score)
-            )
-            # Actualizar XP del usuario
+                VALUES (?, ?, 1, datetime('now'), ?)
+            ''', (session['user_id'], lesson_id, score))
+            
             db.execute(
                 'UPDATE users SET xp = xp + ? WHERE id = ?',
                 (score * 10, session['user_id'])
@@ -149,27 +172,62 @@ def profile():
     db = get_db()
     user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
     
-    # Obtener lecciones completadas
     completed = db.execute(
         'SELECT lesson_id FROM user_lessons WHERE user_id = ? AND completed = 1',
         (session['user_id'],)
     ).fetchall()
-    completed_ids = [row['lesson_id'] for row in completed]
     
-    user_dict = dict(user)
-    user_dict['completed_lessons'] = completed_ids
-    
-    return render_template('profile.html', user=user_dict, lessons=LESSONS)
+    return render_template('profile.html',
+        user={**dict(user), 'completed_lessons': [row['lesson_id'] for row in completed]},
+        lessons=LESSONS
+    )
 
-# Rutas de autenticación (login, register, logout) - mantener igual que antes
-# ... [El resto de tu código de autenticación actual]
+# Autenticación
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        db = get_db()
+        user = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        
+        if user and check_password_hash(user['password'], password):
+            session['user_id'] = user['id']
+            return redirect(url_for('index'))
+        
+        flash('Usuario o contraseña incorrectos', 'danger')
+    
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = generate_password_hash(request.form['password'])
+        
+        db = get_db()
+        try:
+            db.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
+            db.commit()
+            flash('Registro exitoso! Por favor inicia sesión', 'success')
+            return redirect(url_for('login'))
+        except sqlite3.IntegrityError:
+            flash('El usuario ya existe', 'danger')
+    
+    return render_template('register.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 # Inicialización
 with app.app_context():
     init_db()
     # Crear usuario admin si no existe
     db = get_db()
-    if not db.execute('SELECT 1 FROM users LIMIT 1').fetchone():
+    if not db.execute('SELECT 1 FROM users WHERE username = "admin"').fetchone():
         db.execute(
             "INSERT INTO users (username, password, streak, xp) VALUES (?, ?, ?, ?)",
             ("admin", generate_password_hash("admin123"), 5, 100)
