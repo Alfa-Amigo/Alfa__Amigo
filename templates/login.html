@@ -1,34 +1,28 @@
 {% extends "base.html" %}
 
-{% block title %}Iniciar Sesión{% endblock %}
-
 {% block content %}
 <div class="row justify-content-center mt-5">
     <div class="col-md-6 col-lg-4">
         <div class="card shadow">
             <div class="card-body p-5 text-center">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="mb-4" width="120">
-                <h2 class="mb-4">Bienvenido a AlfaAmigo</h2>
-                <p class="text-muted mb-4">Aprende a tu propio ritmo</p>
-                
-                <form method="POST" action="{{ url_for('login') }}">
+                <h2 class="mb-4">Iniciar Sesión</h2>
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                <form method="POST">
                     <div class="mb-3">
-                        <input type="text" class="form-control form-control-lg" name="username" 
-                               placeholder="Tu nombre" required minlength="3" maxlength="20">
+                        <input type="text" class="form-control" name="username" placeholder="Usuario" required>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg w-100">
-                        <i class="fas fa-sign-in-alt me-2"></i> Comenzar
-                    </button>
+                    <div class="mb-3">
+                        <input type="password" class="form-control" name="password" placeholder="Contraseña" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Ingresar</button>
                 </form>
-                
-                <div class="mt-4">
-                    <p class="text-muted">¿Es tu primera vez aquí? Solo ingresa tu nombre para comenzar.</p>
+                <div class="mt-3">
+                    <a href="{{ url_for('register') }}">¿No tienes cuenta? Regístrate</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Añade este script al final -->
-<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 {% endblock %}
