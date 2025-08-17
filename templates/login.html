@@ -14,7 +14,7 @@
                 <form method="POST" action="{{ url_for('login') }}">
                     <div class="mb-3">
                         <input type="text" class="form-control form-control-lg" name="username" 
-                               placeholder="Tu nombre" required>
+                               placeholder="Tu nombre" required minlength="3" maxlength="20">
                     </div>
                     <button type="submit" class="btn btn-primary btn-lg w-100">
                         <i class="fas fa-sign-in-alt me-2"></i> Comenzar
@@ -28,4 +28,7 @@
         </div>
     </div>
 </div>
+
+<!-- Añade este script al final -->
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 {% endblock %}
