@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, redirect, url_for, session, g, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -11,70 +10,76 @@ from dotenv import load_dotenv
 # Configuración inicial
 load_dotenv()
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'tu_clave_secreta_super_segura_aqui')
+app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24).hex())
 app.config['DATABASE'] = os.path.join(os.path.dirname(__file__), 'app.db')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-# Base de datos
+# Base de datos - Versión optimizada para Render
 def get_db():
     if 'db' not in g:
-        g.db = sqlite3.connect(app.config['DATABASE'])
+        g.db = sqlite3.connect(
+            app.config['DATABASE'],
+            detect_types=sqlite3.PARSE_DECLTYPES,
+            timeout=20,
+            check_same_thread=False  # Necesario para Render
+        )
         g.db.row_factory = sqlite3.Row
+        g.db.execute("PRAGMA journal_mode=WAL")
+        g.db.execute("PRAGMA busy_timeout=30000")
     return g.db
 
 def init_db():
-    with app.app_context():
+    try:
         db = get_db()
         cursor = db.cursor()
         
-        # Tabla de usuarios
-        cursor.execute('''
+        cursor.executescript('''
+            BEGIN;
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_login TIMESTAMP
-            )
-        ''')
-        
-        # Tabla de progreso
-        cursor.execute('''
+            );
+            
             CREATE TABLE IF NOT EXISTS user_progress (
                 user_id INTEGER PRIMARY KEY,
                 xp INTEGER DEFAULT 0,
                 streak INTEGER DEFAULT 0,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
-        
-        # Tabla de lecciones completadas
-        cursor.execute('''
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+            
             CREATE TABLE IF NOT EXISTS completed_lessons (
                 user_id INTEGER,
                 lesson_id INTEGER,
                 completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 score INTEGER,
-                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
                 PRIMARY KEY (user_id, lesson_id)
-            )
+            );
+            COMMIT;
         ''')
         db.commit()
+    except Exception as e:
+        print(f"Error inicializando DB: {str(e)}")
+        if 'db' in g:
+            g.db.rollback()
 
 # Decorador para rutas protegidas
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            flash('Por favor inicia sesión primero', 'warning')
+            flash('Por favor inicia sesión para acceder a esta página', 'warning')
             return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
 
 # Cerrar conexión
 @app.teardown_appcontext
-def close_db(exception):
+def close_db(exception=None):
     db = g.pop('db', None)
     if db is not None:
         db.close()
@@ -95,15 +100,18 @@ lessons = load_lessons()
 def inject_user():
     user_data = {}
     if 'user_id' in session:
-        db = get_db()
-        user = db.execute('''
-            SELECT u.username, up.xp, up.streak 
-            FROM users u
-            LEFT JOIN user_progress up ON u.id = up.user_id
-            WHERE u.id = ?
-        ''', (session['user_id'],)).fetchone()
-        if user:
-            user_data = dict(user)
+        try:
+            db = get_db()
+            user = db.execute('''
+                SELECT u.username, up.xp, up.streak 
+                FROM users u
+                LEFT JOIN user_progress up ON u.id = up.user_id
+                WHERE u.id = ?
+            ''', (session['user_id'],)).fetchone()
+            if user:
+                user_data = dict(user)
+        except Exception as e:
+            print(f"Error obteniendo datos de usuario: {str(e)}")
     return {'current_user': user_data}
 
 # Manejo de errores
@@ -122,15 +130,14 @@ def register():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
         
-        if not username or not password:
-            flash('Todos los campos son requeridos', 'danger')
+        if len(username) < 4 or len(password) < 6:
+            flash('Usuario debe tener al menos 4 caracteres y contraseña 6', 'danger')
             return redirect(url_for('register'))
         
         try:
             db = get_db()
             hashed_pw = generate_password_hash(password)
             
-            # Insertar usuario
             cursor = db.cursor()
             cursor.execute(
                 "INSERT INTO users (username, password) VALUES (?, ?)",
@@ -138,14 +145,13 @@ def register():
             )
             user_id = cursor.lastrowid
             
-            # Inicializar progreso
             cursor.execute(
                 "INSERT INTO user_progress (user_id) VALUES (?)",
                 (user_id,)
             )
             db.commit()
             
-            flash('Registro exitoso! Por favor inicia sesión', 'success')
+            flash('¡Registro exitoso! Por favor inicia sesión', 'success')
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
             flash('El nombre de usuario ya existe', 'danger')
@@ -166,7 +172,7 @@ def login():
             user = db.execute(
                 'SELECT * FROM users WHERE username = ?', (username,)
             ).fetchone()
-            
+
             if user and check_password_hash(user['password'], password):
                 session['user_id'] = user['id']
                 session.permanent = True
@@ -183,14 +189,15 @@ def login():
                 cursor.execute('''
                     UPDATE user_progress 
                     SET streak = CASE 
-                        WHEN DATE(last_login) = DATE(?, '-1 day') THEN streak + 1
-                        ELSE 1
+                        WHEN last_login IS NOT NULL AND DATE(last_login) = DATE(?, '-1 day') 
+                        THEN streak + 1 
+                        ELSE 1 
                     END
                     WHERE user_id = ?
                 ''', (today, user['id']))
                 db.commit()
                 
-                next_page = request.args.get('next') or url_for('index')
+                next_page = request.args.get('next', url_for('index'))
                 return redirect(next_page)
             
             flash('Usuario o contraseña incorrectos', 'danger')
@@ -210,41 +217,52 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html', lessons=lessons)
+    try:
+        return render_template('index.html', lessons=lessons)
+    except Exception as e:
+        print(f"Error cargando índice: {str(e)}")
+        flash('Error al cargar las lecciones', 'danger')
+        return render_template('index.html', lessons=[])
 
 @app.route('/profile')
 @login_required
 def profile():
-    db = get_db()
-    user = db.execute('''
-        SELECT u.username, u.created_at, up.xp, up.streak
-        FROM users u
-        JOIN user_progress up ON u.id = up.user_id
-        WHERE u.id = ?
-    ''', (session['user_id'],)).fetchone()
-    
-    completed = db.execute('''
-        SELECT lesson_id, score, completed_at
-        FROM completed_lessons
-        WHERE user_id = ?
-        ORDER BY completed_at DESC
-    ''', (session['user_id'],)).fetchall()
-    
-    completed_lessons = []
-    for row in completed:
-        lesson = next((l for l in lessons if l['id'] == row['lesson_id']), None)
-        if lesson:
-            completed_lessons.append({
-                'title': lesson['title'],
-                'category': lesson['category'],
-                'score': row['score'],
-                'completed_at': row['completed_at'],
-                'max_score': len(lesson.get('quiz', []))
-            })
-    
-    return render_template('profile.html', 
-                         user=dict(user),
-                         completed_lessons=completed_lessons)
+    try:
+        db = get_db()
+        user = db.execute('''
+            SELECT u.username, u.created_at, up.xp, up.streak
+            FROM users u
+            JOIN user_progress up ON u.id = up.user_id
+            WHERE u.id = ?
+        ''', (session['user_id'],)).fetchone()
+        
+        completed = db.execute('''
+            SELECT lesson_id, score, completed_at
+            FROM completed_lessons
+            WHERE user_id = ?
+            ORDER BY completed_at DESC
+            LIMIT 10
+        ''', (session['user_id'],)).fetchall()
+        
+        completed_lessons = []
+        for row in completed:
+            lesson = next((l for l in lessons if l['id'] == row['lesson_id']), None)
+            if lesson:
+                completed_lessons.append({
+                    'title': lesson['title'],
+                    'category': lesson['category'],
+                    'score': row['score'],
+                    'completed_at': row['completed_at'],
+                    'max_score': len(lesson.get('quiz', []))
+                })
+        
+        return render_template('profile.html', 
+                            user=dict(user),
+                            completed_lessons=completed_lessons)
+    except Exception as e:
+        print(f"Error cargando perfil: {str(e)}")
+        flash('Error al cargar tu perfil', 'danger')
+        return redirect(url_for('index'))
 
 @app.route('/lesson/<int:lesson_id>')
 @login_required
@@ -259,13 +277,13 @@ def lesson_detail(lesson_id):
 @login_required
 def quiz(lesson_id):
     lesson = next((l for l in lessons if l['id'] == lesson_id), None)
-    if not lesson:
+    if not lesson or 'quiz' not in lesson:
         flash('Lección no encontrada', 'danger')
         return redirect(url_for('index'))
     
     if request.method == 'POST':
         score = 0
-        for q in lesson.get('quiz', []):
+        for q in lesson['quiz']:
             if request.form.get(f'q{q["id"]}') == q['correct_answer']:
                 score += 1
         
@@ -282,7 +300,7 @@ def quiz(lesson_id):
             ''', (score * 10, session['user_id']))
             
             db.commit()
-            flash(f'Quiz completado! Puntaje: {score}/{len(lesson["quiz"])}', 'success')
+            flash(f'¡Quiz completado! Puntaje: {score}/{len(lesson["quiz"])}', 'success')
             return render_template('quiz_result.html', 
                                 lesson=lesson,
                                 score=score,
@@ -293,26 +311,25 @@ def quiz(lesson_id):
     
     return render_template('quiz.html', lesson=lesson)
 
-# Inicialización
-with app.app_context():
-    init_db()
-    
-    # Crear usuario demo si no existe
-    db = get_db()
-    if not db.execute('SELECT 1 FROM users LIMIT 1').fetchone():
+# Inicialización segura para Render
+@app.before_first_request
+def initialize():
+    with app.app_context():
+        init_db()
+        # Crear usuario admin si no existe
         try:
-            db.execute(
-                "INSERT INTO users (username, password) VALUES (?, ?)",
-                ("demo", generate_password_hash("demo123"))
-            )
-            db.execute(
-                "INSERT INTO user_progress (user_id) VALUES (?)",
-                (db.lastrowid,)
-            )
-            db.commit()
-            print("Usuario demo creado: demo / demo123")
+            db = get_db()
+            if not db.execute('SELECT 1 FROM users LIMIT 1').fetchone():
+                db.execute(
+                    "INSERT INTO users (username, password) VALUES (?, ?)",
+                    ("admin", generate_password_hash("admin123"))
+                db.commit()
+                print("Usuario admin creado: admin/admin123")
         except Exception as e:
-            print(f"Error creando usuario demo: {str(e)}")
+            print(f"Error inicializando usuario admin: {str(e)}")
 
 if __name__ == '__main__':
+    # Solo para desarrollo local
+    with app.app_context():
+        init_db()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
