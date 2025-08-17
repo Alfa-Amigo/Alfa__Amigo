@@ -3,9 +3,11 @@ from datetime import datetime
 import json
 import os
 import sqlite3
-from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 
 # Cargar variables de entorno
+from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
@@ -28,6 +30,15 @@ def get_db():
         db.row_factory = sqlite3.Row
     return db
 
+# Decorador para rutas protegidas
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 # Inicialización de la base de datos
 def init_db():
     with app.app_context():
@@ -39,6 +50,7 @@ def init_db():
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 xp INTEGER DEFAULT 0,
                 streak INTEGER DEFAULT 0,
@@ -57,7 +69,6 @@ def init_db():
                 PRIMARY KEY (user_id, lesson_id)
             )
         ''')
-        
         db.commit()
 
 # Cargar lecciones
@@ -106,51 +117,62 @@ def close_connection(exception):
 
 # Rutas principales
 @app.route('/')
+@login_required
 def index():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
     return render_template('index.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = generate_password_hash(request.form['password'])
+        
+        db = get_db()
+        try:
+            cursor = db.cursor()
+            cursor.execute(
+                "INSERT INTO users (username, password) VALUES (?, ?)",
+                (username, password)
+            )
+            db.commit()
+        except sqlite3.IntegrityError:
+            return "El nombre de usuario ya existe"
+        
+        return redirect(url_for('login'))
+    
+    return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        if not username:
-            return redirect(url_for('login'))
+        username = request.form['username']
+        password = request.form['password']
         
         db = get_db()
         cursor = db.cursor()
-        
-        # Buscar o crear usuario
-        cursor.execute('SELECT id, streak FROM users WHERE username = ?', (username,))
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
         user = cursor.fetchone()
         
-        today = datetime.now().strftime('%Y-%m-%d')
-        
-        if user:
-            # Actualizar racha si ha vuelto hoy
+        if user and check_password_hash(user['password'], password):
+            session['user_id'] = user['id']
+            
+            # Actualizar última conexión y racha
+            today = datetime.now().strftime('%Y-%m-%d')
             if user['last_login'] != today:
                 new_streak = user['streak'] + 1 if user['last_login'] == (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d') else 1
                 cursor.execute('UPDATE users SET last_login = ?, streak = ? WHERE id = ?', 
                              (today, new_streak, user['id']))
-            user_id = user['id']
-        else:
-            # Nuevo usuario
-            cursor.execute('INSERT INTO users (username, last_login, streak) VALUES (?, ?, 1)',
-                         (username, today))
-            user_id = cursor.lastrowid
+                db.commit()
+            
+            return redirect(url_for('index'))
         
-        db.commit()
-        session['user_id'] = user_id
-        return redirect(url_for('index'))
+        return render_template('login.html', error="Credenciales inválidas")
     
     return render_template('login.html')
 
 @app.route('/lesson/<int:lesson_id>')
+@login_required
 def lesson_detail(lesson_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
     lesson = next((l for l in lessons if l['id'] == lesson_id), None)
     if not lesson:
         return redirect(url_for('index'))
@@ -158,16 +180,13 @@ def lesson_detail(lesson_id):
     return render_template('lesson_detail.html', lesson=lesson)
 
 @app.route('/quiz/<int:lesson_id>', methods=['GET', 'POST'])
+@login_required
 def quiz(lesson_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
     lesson = next((l for l in lessons if l['id'] == lesson_id), None)
     if not lesson:
         return redirect(url_for('index'))
     
     if request.method == 'POST':
-        # Calcular puntaje
         score = sum(1 for q in lesson['quiz'] 
                    if request.form.get(f'q{q["id"]}') == q['correct_answer'])
         
@@ -197,10 +216,8 @@ def quiz(lesson_id):
     return render_template('quiz.html', lesson=lesson)
 
 @app.route('/profile')
+@login_required
 def profile():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
     db = get_db()
     cursor = db.cursor()
     
@@ -239,25 +256,12 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# API para progreso (opcional para futuras extensiones)
-@app.route('/api/progress')
-def get_progress():
-    if 'user_id' not in session:
-        return jsonify({'error': 'No autenticado'}), 401
-    
-    db = get_db()
-    cursor = db.cursor()
-    
-    cursor.execute('SELECT xp, streak FROM users WHERE id = ?', (session['user_id'],))
-    progress = cursor.fetchone()
-    
-    return jsonify(dict(progress))
-
 # Inicializar la base de datos al iniciar
 init_db()
 
 # Configuración para producción
 if __name__ == '__main__':
+    from datetime import timedelta  # Importación adicional necesaria
     port = int(os.environ.get("PORT", 10000))
     app.run(
         host='0.0.0.0',
