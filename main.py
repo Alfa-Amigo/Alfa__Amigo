@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, g
 from datetime import datetime
 import json
 import os
+import sqlite3
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
@@ -12,11 +13,52 @@ app.secret_key = os.environ.get('SECRET_KEY', 'clave_secreta_por_defecto_para_de
 
 # Configuración para Render
 app.config.update(
+    DATABASE=os.path.join(os.path.dirname(__file__), 'app.db'),
     SESSION_COOKIE_SECURE=True,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=3600  # 1 hora en segundos
 )
+
+# Conexión a la base de datos
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(app.config['DATABASE'])
+        db.row_factory = sqlite3.Row
+    return db
+
+# Inicialización de la base de datos
+def init_db():
+    with app.app_context():
+        db = get_db()
+        cursor = db.cursor()
+        
+        # Tabla de usuarios
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                xp INTEGER DEFAULT 0,
+                streak INTEGER DEFAULT 0,
+                last_login DATE
+            )
+        ''')
+        
+        # Tabla de lecciones completadas
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS completed_lessons (
+                user_id INTEGER,
+                lesson_id INTEGER,
+                completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                score INTEGER,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                PRIMARY KEY (user_id, lesson_id)
+            )
+        ''')
+        
+        db.commit()
 
 # Cargar lecciones
 def load_lessons():
@@ -27,14 +69,21 @@ lessons = load_lessons()
 
 @app.context_processor
 def inject_global_data():
+    user_data = None
+    if 'user_id' in session:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('SELECT username, xp, streak FROM users WHERE id = ?', (session['user_id'],))
+        user_data = cursor.fetchone()
+    
     return {
-        'user': session.get('user'),
-        'categories': ['Lectura', 'Matemáticas', 'Escritura', 'Vocabulario'],  # Corregido mayúscula
+        'user': dict(user_data) if user_data else None,
+        'categories': ['Lectura', 'Matemáticas', 'Escritura', 'Vocabulario'],
         'category_icons': {
             'Lectura': 'book-open',
             'Matemáticas': 'calculator',
             'Escritura': 'pen',
-            'Vocabulario': 'language'  # Icono añadido
+            'Vocabulario': 'language'
         },
         'lessons': lessons
     }
@@ -48,10 +97,17 @@ def page_not_found(e):
 def internal_error(e):
     return render_template('500.html'), 500
 
+# Cerrar conexión a la BD al terminar
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
+
 # Rutas principales
 @app.route('/')
 def index():
-    if 'user' not in session:
+    if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('index.html')
 
@@ -61,63 +117,144 @@ def login():
         username = request.form.get('username', '').strip()
         if not username:
             return redirect(url_for('login'))
-            
-        session['user'] = {
-            'name': username,
-            'joined': datetime.now().strftime('%d/%m/%Y'),
-            'xp': 0,
-            'streak': 1,
-            'completed_lessons': []
-        }
+        
+        db = get_db()
+        cursor = db.cursor()
+        
+        # Buscar o crear usuario
+        cursor.execute('SELECT id, streak FROM users WHERE username = ?', (username,))
+        user = cursor.fetchone()
+        
+        today = datetime.now().strftime('%Y-%m-%d')
+        
+        if user:
+            # Actualizar racha si ha vuelto hoy
+            if user['last_login'] != today:
+                new_streak = user['streak'] + 1 if user['last_login'] == (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d') else 1
+                cursor.execute('UPDATE users SET last_login = ?, streak = ? WHERE id = ?', 
+                             (today, new_streak, user['id']))
+            user_id = user['id']
+        else:
+            # Nuevo usuario
+            cursor.execute('INSERT INTO users (username, last_login, streak) VALUES (?, ?, 1)',
+                         (username, today))
+            user_id = cursor.lastrowid
+        
+        db.commit()
+        session['user_id'] = user_id
         return redirect(url_for('index'))
+    
     return render_template('login.html')
 
 @app.route('/lesson/<int:lesson_id>')
 def lesson_detail(lesson_id):
-    if 'user' not in session:
+    if 'user_id' not in session:
         return redirect(url_for('login'))
-
+    
     lesson = next((l for l in lessons if l['id'] == lesson_id), None)
     if not lesson:
         return redirect(url_for('index'))
-
+    
     return render_template('lesson_detail.html', lesson=lesson)
 
 @app.route('/quiz/<int:lesson_id>', methods=['GET', 'POST'])
 def quiz(lesson_id):
-    if 'user' not in session:
+    if 'user_id' not in session:
         return redirect(url_for('login'))
-
+    
     lesson = next((l for l in lessons if l['id'] == lesson_id), None)
     if not lesson:
         return redirect(url_for('index'))
-
+    
     if request.method == 'POST':
+        # Calcular puntaje
         score = sum(1 for q in lesson['quiz'] 
-                if request.form.get(f'q{q["id"]}') == q['correct_answer'])
-
-        if lesson_id not in session['user']['completed_lessons']:
-            session['user']['completed_lessons'].append(lesson_id)
-            session['user']['xp'] += score * 10
-            session.modified = True
-
+                   if request.form.get(f'q{q["id"]}') == q['correct_answer'])
+        
+        db = get_db()
+        cursor = db.cursor()
+        
+        # Registrar lección completada
+        cursor.execute('''
+            INSERT OR REPLACE INTO completed_lessons (user_id, lesson_id, score)
+            VALUES (?, ?, ?)
+        ''', (session['user_id'], lesson_id, score))
+        
+        # Actualizar XP del usuario
+        cursor.execute('''
+            UPDATE users 
+            SET xp = xp + ?
+            WHERE id = ?
+        ''', (score * 10, session['user_id']))
+        
+        db.commit()
+        
         return render_template('quiz_result.html', 
-                           lesson=lesson,
-                           score=score,
-                           total=len(lesson['quiz']))
-
+                             lesson=lesson,
+                             score=score,
+                             total=len(lesson['quiz']))
+    
     return render_template('quiz.html', lesson=lesson)
 
 @app.route('/profile')
 def profile():
-    if 'user' not in session:
+    if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('profile.html')
+    
+    db = get_db()
+    cursor = db.cursor()
+    
+    # Datos del usuario
+    cursor.execute('SELECT username, xp, streak, created_at FROM users WHERE id = ?', (session['user_id'],))
+    user = cursor.fetchone()
+    
+    # Lecciones completadas
+    cursor.execute('''
+        SELECT lesson_id, score, completed_at 
+        FROM completed_lessons 
+        WHERE user_id = ?
+        ORDER BY completed_at DESC
+    ''', (session['user_id'],))
+    completed = cursor.fetchall()
+    
+    # Mapear lecciones completadas con datos de lecciones
+    completed_lessons = []
+    for row in completed:
+        lesson = next((l for l in lessons if l['id'] == row['lesson_id']), None)
+        if lesson:
+            completed_lessons.append({
+                'title': lesson['title'],
+                'category': lesson['category'],
+                'score': row['score'],
+                'completed_at': row['completed_at'],
+                'max_score': len(lesson['quiz'])
+            })
+    
+    return render_template('profile.html', 
+                         user=user,
+                         completed_lessons=completed_lessons)
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+# API para progreso (opcional para futuras extensiones)
+@app.route('/api/progress')
+def get_progress():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autenticado'}), 401
+    
+    db = get_db()
+    cursor = db.cursor()
+    
+    cursor.execute('SELECT xp, streak FROM users WHERE id = ?', (session['user_id'],))
+    progress = cursor.fetchone()
+    
+    return jsonify(dict(progress))
+
+# Inicializar la base de datos al iniciar
+init_db()
 
 # Configuración para producción
 if __name__ == '__main__':
