@@ -41,7 +41,7 @@ CATEGORY_ICONS = {
     'Vocabulario': 'language'
 }
 
-# Decorador login_required con manejo de endpoints únicos
+# Decorador login_required
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -51,10 +51,10 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Rutas con endpoints únicos
+# Rutas principales
 @app.route('/')
 @login_required
-def home():
+def index():  # Nombre cambiado a 'index' para coincidir con las plantillas
     user = users.get(session['username'])
     return render_template('index.html',
         user=user,
@@ -66,7 +66,7 @@ def home():
 
 @app.route('/profile')
 @login_required
-def profile_page():  # Nombre único
+def profile():
     user = users.get(session['username'])
     completed = user.get('completed_lessons', [])
     return render_template('profile.html',
@@ -86,7 +86,7 @@ def login():
         if user and check_password_hash(user['password'], password):
             session['username'] = username
             flash(f'👋 ¡Bienvenido {username}!', 'success')
-            return redirect(url_for('home'))
+            return redirect(url_for('index'))
         
         flash('❌ Usuario o contraseña incorrectos', 'danger')
     
@@ -122,20 +122,20 @@ def register():
 
 @app.route('/lesson/<int:lesson_id>')
 @login_required
-def view_lesson(lesson_id):  # Nombre único
+def lesson_detail(lesson_id):
     lesson = next((l for l in LESSONS if l['id'] == lesson_id), None)
     if not lesson:
         flash('Lección no encontrada', 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('index'))
     return render_template('lesson_detail.html', lesson=lesson)
 
 @app.route('/lesson/<int:lesson_id>/quiz', methods=['GET', 'POST'])
 @login_required
-def take_quiz(lesson_id):  # Nombre único
+def quiz(lesson_id):
     lesson = next((l for l in LESSONS if l['id'] == lesson_id), None)
     if not lesson:
         flash('Lección no encontrada', 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('index'))
     
     if request.method == 'POST':
         score = sum(
@@ -148,13 +148,13 @@ def take_quiz(lesson_id):  # Nombre único
         if lesson_id not in user['completed_lessons']:
             user['completed_lessons'].append(lesson_id)
         
-        return redirect(url_for('quiz_results', lesson_id=lesson_id, score=score))
+        return redirect(url_for('quiz_result', lesson_id=lesson_id, score=score))
     
     return render_template('quiz.html', lesson=lesson)
 
 @app.route('/lesson/<int:lesson_id>/result')
 @login_required
-def quiz_results(lesson_id):  # Nombre único
+def quiz_result(lesson_id):
     lesson = next((l for l in LESSONS if l['id'] == lesson_id), None)
     score = request.args.get('score', 0)
     return render_template('quiz_result.html', 
