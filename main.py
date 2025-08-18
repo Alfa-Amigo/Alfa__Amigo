@@ -5,37 +5,35 @@ import json
 import os
 from pathlib import Path
 
-# Configuración inicial
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY') or 'clave_temporal_para_desarrollo'
+app.secret_key = os.environ.get('SECRET_KEY') or 'clave_secreta_temporal_123'
 
-# Rutas de archivos
+# Configuración de rutas - AJUSTADA PARA PUBLIC/STATIC/DATA
 BASE_DIR = Path(__file__).parent
-LESSONS_FILE = BASE_DIR / 'static' / 'data' / 'lessons.json'
+app.config['LESSONS_FILE'] = BASE_DIR / 'public' / 'static' / 'data' / 'lessons.json'
 
-# Crear directorios si no existen
-os.makedirs(BASE_DIR / 'static' / 'data', exist_ok=True)
+# Crear directorios necesarios
+os.makedirs(BASE_DIR / 'public' / 'static' / 'data', exist_ok=True)
 
-# Datos en memoria (sustituto de base de datos)
+# Datos en memoria
 users = {
     'admin': {
         'password': generate_password_hash('admin123'),
-        'name': 'Administrador',
+        'name': 'Admin',
         'xp': 100,
         'streak': 5,
-        'completed_lessons': [1, 2, 3]
+        'completed_lessons': []
     }
 }
 
-# Cargar lecciones con manejo de errores
 def load_lessons():
     try:
-        if not LESSONS_FILE.exists():
-            raise FileNotFoundError(f"Archivo {LESSONS_FILE} no encontrado")
+        if not os.path.exists(app.config['LESSONS_FILE']):
+            raise FileNotFoundError(f"Archivo no encontrado en: {app.config['LESSONS_FILE']}")
             
-        with open(LESSONS_FILE, 'r', encoding='utf-8') as f:
+        with open(app.config['LESSONS_FILE'], 'r', encoding='utf-8') as f:
             lessons = json.load(f)
-            print(f"✅ Lecciones cargadas: {len(lessons)} encontradas")
+            print(f"✅ Lecciones cargadas desde: {app.config['LESSONS_FILE']}")
             return lessons
     except Exception as e:
         print(f"❌ Error cargando lecciones: {str(e)}")
@@ -43,12 +41,12 @@ def load_lessons():
         return [
             {
                 "id": 1,
-                "title": "Ejemplo",
-                "description": "Lección de ejemplo",
+                "title": "Lección de Ejemplo",
+                "description": "Contenido de ejemplo porque no se encontró el archivo",
                 "category": "General",
-                "content": [{"type": "text", "content": "Contenido de ejemplo"}],
+                "content": [{"type": "text", "content": "Ejemplo de contenido"}],
                 "quiz": [{
-                    "id": 1, 
+                    "id": 1,
                     "question": "Pregunta ejemplo",
                     "options": ["Opción 1", "Opción 2"],
                     "correct_answer": "Opción 1"
@@ -59,13 +57,12 @@ def load_lessons():
 LESSONS = load_lessons()
 CATEGORIES = sorted({lesson.get('category', 'General') for lesson in LESSONS})
 CATEGORY_ICONS = {
+    'General': 'question-circle',
     'Lectura': 'book',
     'Matemáticas': 'calculator',
-    'Vocabulario': 'language',
-    'General': 'question-circle'
+    'Vocabulario': 'language'
 }
 
-# Decorador para rutas protegidas
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -75,9 +72,8 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Sistema de rutas
 @app.route('/')
-def index():  # Mantenemos 'index' para compatibilidad
+def index():
     if 'username' not in session:
         return redirect(url_for('login'))
     
@@ -93,14 +89,14 @@ def index():  # Mantenemos 'index' para compatibilidad
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username'].strip()
-        password = request.form['password'].strip()
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
         
         user = users.get(username)
         
         if user and check_password_hash(user['password'], password):
             session['username'] = username
-            flash(f'Bienvenido {username}!', 'success')
+            flash(f'¡Bienvenido {username}!', 'success')
             return redirect(url_for('index'))
         
         flash('Usuario o contraseña incorrectos', 'danger')
@@ -110,14 +106,14 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username'].strip()
-        password = request.form['password'].strip()
-        confirm = request.form['confirm_password'].strip()
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        confirm = request.form.get('confirm_password', '').strip()
 
         if len(username) < 4:
-            flash('Usuario muy corto (mín. 4 caracteres)', 'danger')
+            flash('Usuario muy corto (mínimo 4 caracteres)', 'danger')
         elif len(password) < 6:
-            flash('Contraseña muy corta (mín. 6 caracteres)', 'danger')
+            flash('Contraseña muy corta (mínimo 6 caracteres)', 'danger')
         elif password != confirm:
             flash('Las contraseñas no coinciden', 'danger')
         elif username in users:
@@ -130,7 +126,7 @@ def register():
                 'streak': 0,
                 'completed_lessons': []
             }
-            flash('Registro exitoso! Por favor inicia sesión', 'success')
+            flash('¡Registro exitoso! Por favor inicia sesión', 'success')
             return redirect(url_for('login'))
     
     return render_template('register.html')
