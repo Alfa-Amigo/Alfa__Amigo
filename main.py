@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, g, flash, json
+from flask import Flask, render_template, request, redirect, url_for, session, g, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import sqlite3
@@ -9,6 +9,7 @@ from pathlib import Path
 # Configuración inicial
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'tu_clave_secreta_super_segura_2025')
+app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 1 día en segundos
 
 # Configuración de rutas
 BASE_DIR = Path(__file__).parent
@@ -46,7 +47,6 @@ def init_db():
         db = get_db()
         cursor = db.cursor()
         
-        # Tabla de usuarios mejorada
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,7 +59,6 @@ def init_db():
             )
         ''')
         
-        # Tabla de progreso mejorada
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_lessons (
                 user_id INTEGER,
@@ -79,7 +78,7 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             flash('🔒 Por favor inicia sesión para acceder', 'warning')
-            return redirect(url_for('login'))
+            return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -96,7 +95,6 @@ def index():
     db = get_db()
     user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
     
-    # Obtener progreso del usuario
     progress = db.execute('''
         SELECT lesson_id, MAX(score) as best_score 
         FROM user_lessons 
@@ -118,14 +116,8 @@ def index():
 @login_required
 def profile():
     db = get_db()
-    
-    # Obtener usuario
     user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    if not user:
-        flash('Usuario no encontrado', 'danger')
-        return redirect(url_for('index'))
     
-    # Obtener lecciones completadas
     completed_lessons = db.execute('''
         SELECT ul.lesson_id, ul.score, l.title, l.category 
         FROM user_lessons ul
@@ -135,7 +127,6 @@ def profile():
         ORDER BY ul.completed_at DESC
     ''', (json.dumps(LESSONS), session['user_id'])).fetchall()
     
-    # Calcular progreso
     total_lessons = len(LESSONS)
     completed_count = len(completed_lessons)
     progress_percent = round((completed_count / total_lessons) * 100) if total_lessons > 0 else 0
@@ -154,7 +145,6 @@ def login():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
         
-        # Validación
         if not username or not password:
             flash('⚠️ Usuario y contraseña son requeridos', 'danger')
             return render_template('login.html', username=username)
@@ -166,23 +156,24 @@ def login():
         ).fetchone()
         
         if user and check_password_hash(user['password'], password):
+            session.clear()
             session['user_id'] = user['id']
+            session.permanent = True
             
-            # Actualizar última conexión
             db.execute(
                 'UPDATE users SET last_login = datetime("now") WHERE id = ?',
                 (user['id'],)
             )
             db.commit()
             
+            next_page = request.args.get('next')
             flash(f'👋 ¡Bienvenido {username}!', 'success')
-            return redirect(url_for('index'))
+            return redirect(next_page or url_for('index'))
         
-        # Mensaje genérico por seguridad
         flash('❌ Usuario o contraseña incorrectos', 'danger')
         return render_template('login.html', username=username)
     
-    return render_template('login.html')
+    return render_template('login.html', next=request.args.get('next'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -190,7 +181,6 @@ def register():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
         
-        # Validaciones mejoradas
         errors = []
         if len(username) < 4:
             errors.append("El usuario debe tener al menos 4 caracteres")
@@ -228,7 +218,6 @@ def logout():
 with app.app_context():
     init_db()
     
-    # Crear usuario admin si no existe
     db = get_db()
     if not db.execute('SELECT 1 FROM users WHERE username = "admin"').fetchone():
         db.execute(
