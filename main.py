@@ -66,6 +66,11 @@ def inject_global_data():
     }
 
 # Rutas principales
+
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
 @app.route('/')
 def index():
     if 'user' not in session:
