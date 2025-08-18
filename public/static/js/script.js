@@ -1,42 +1,74 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Función para manejar el slider
-    function setupSlider(section) {
-        const row = section.querySelector('.lesson-row');
-        const prevBtn = section.querySelector('.prev-slide');
-        const nextBtn = section.querySelector('.next-slide');
+    // ======================
+    // MANEJADOR DE SLIDERS
+    // ======================
+    function initSliders() {
+        document.querySelectorAll('.category-section').forEach(section => {
+            const slider = section.querySelector('.lesson-row');
+            const prevBtn = section.querySelector('.prev-slide');
+            const nextBtn = section.querySelector('.next-slide');
 
-        // Solo configurar controles en desktop
-        if (window.innerWidth >= 992) {
-            let scrollPosition = 0;
-            const scrollAmount = 400;
+            if (!slider || !prevBtn || !nextBtn) return;
+
+            let isDragging = false;
+            let startPos = 0;
+            let currentTranslate = 0;
+            let prevTranslate = 0;
+
+            // Touch/Desktop events
+            slider.addEventListener('mousedown', dragStart);
+            slider.addEventListener('touchstart', dragStart);
+            slider.addEventListener('mouseup', dragEnd);
+            slider.addEventListener('mouseleave', dragEnd);
+            slider.addEventListener('touchend', dragEnd);
+            slider.addEventListener('mousemove', drag);
+            slider.addEventListener('touchmove', drag);
+
+            // Botones de navegación
+            prevBtn.addEventListener('click', () => {
+                slider.scrollBy({ left: -300, behavior: 'smooth' });
+            });
 
             nextBtn.addEventListener('click', () => {
-                scrollPosition += scrollAmount;
-                if (scrollPosition > row.scrollWidth - row.clientWidth) {
-                    scrollPosition = row.scrollWidth - row.clientWidth;
-                }
-                row.scrollTo({
-                    left: scrollPosition,
-                    behavior: 'smooth'
-                });
+                slider.scrollBy({ left: 300, behavior: 'smooth' });
             });
 
-            prevBtn.addEventListener('click', () => {
-                scrollPosition -= scrollAmount;
-                if (scrollPosition < 0) {
-                    scrollPosition = 0;
+            function dragStart(e) {
+                if (e.type === 'touchstart') {
+                    startPos = e.touches[0].clientX;
+                } else {
+                    startPos = e.clientX;
+                    e.preventDefault();
                 }
-                row.scrollTo({
-                    left: scrollPosition,
-                    behavior: 'smooth'
-                });
-            });
-        }
+                
+                isDragging = true;
+                slider.style.cursor = 'grabbing';
+                slider.style.scrollBehavior = 'auto';
+            }
 
-        // Efectos hover para todas las pantallas
-        section.querySelectorAll('.lesson-card').forEach(card => {
+            function drag(e) {
+                if (!isDragging) return;
+                const currentPosition = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+                const diff = currentPosition - startPos;
+                slider.scrollLeft = slider.scrollLeft - diff;
+                startPos = currentPosition;
+            }
+
+            function dragEnd() {
+                isDragging = false;
+                slider.style.cursor = 'grab';
+                slider.style.scrollBehavior = 'smooth';
+            }
+        });
+    }
+
+    // ======================
+    // EFECTOS HOVER
+    // ======================
+    function setupHoverEffects() {
+        document.querySelectorAll('.lesson-card').forEach(card => {
             card.addEventListener('mouseenter', () => {
-                if (window.innerWidth >= 768) { // Solo en tablets y desktop
+                if (window.innerWidth >= 768) {
                     card.style.transform = 'translateY(-5px)';
                     card.style.boxShadow = '0 8px 20px rgba(0,0,0,0.12)';
                 }
@@ -45,34 +77,71 @@ document.addEventListener('DOMContentLoaded', function() {
             card.addEventListener('mouseleave', () => {
                 if (window.innerWidth >= 768) {
                     card.style.transform = '';
-                    card.style.boxShadow = '0 3px 10px rgba(0,0,0,0.08)';
+                    card.style.boxShadow = '';
                 }
             });
         });
     }
 
-    // Configurar todos los sliders
-    document.querySelectorAll('.category-section').forEach(setupSlider);
+    // ======================
+    // CARGA DIFERIDA DE IMÁGENES
+    // ======================
+    function lazyLoadImages() {
+        const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                    }
+                    observer.unobserve(img);
+                }
+            });
+        }, {
+            rootMargin: '200px'
+        });
 
-    // Reconfigurar al cambiar tamaño de pantalla
-    window.addEventListener('resize', function() {
-        document.querySelectorAll('.category-section').forEach(setupSlider);
-    });
-
-    // Carga diferida de imágenes
-    const lazyLoad = function() {
-        const images = document.querySelectorAll('.card-img-container img[loading="lazy"]');
-
-        images.forEach(img => {
-            if (img.getAttribute('data-src') && img.getBoundingClientRect().top < window.innerHeight + 200) {
-                img.setAttribute('src', img.getAttribute('data-src'));
-                img.removeAttribute('data-src');
+        lazyImages.forEach(img => {
+            if (img.dataset.src) {
+                observer.observe(img);
             }
         });
-    };
+    }
 
-    // Carga inicial y al hacer scroll
-    lazyLoad();
-    window.addEventListener('scroll', lazyLoad);
-    window.addEventListener('resize', lazyLoad);
+    // ======================
+    // MANEJADOR DE QUIZ
+    // ======================
+    function setupQuizHandlers() {
+        const quizForms = document.querySelectorAll('form[method="POST"]');
+        
+        quizForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const unanswered = this.querySelectorAll('input[type="radio"]:not(:checked)').length;
+                const totalQuestions = this.querySelectorAll('.quiz-question').length;
+                
+                if (unanswered === totalQuestions) {
+                    e.preventDefault();
+                    alert('⚠️ Por favor responde al menos una pregunta');
+                } else if (unanswered > 0) {
+                    if (!confirm(`Tienes ${unanswered} preguntas sin responder. ¿Quieres enviar igual?`)) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
+    }
+
+    // ======================
+    // INICIALIZACIÓN
+    // ======================
+    initSliders();
+    setupHoverEffects();
+    lazyLoadImages();
+    setupQuizHandlers();
+
+    // Re-iniciar sliders al redimensionar
+    window.addEventListener('resize', initSliders);
 });
