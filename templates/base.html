@@ -42,20 +42,14 @@
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
                 {% else %}
-                <a href="{{ url_for('login') }}" class="btn btn-outline-light">
-                    <i class="fas fa-sign-in-alt"></i> Entrar
-                </a>
+           
                 {% endif %}
             </div>
         </div>
 
 
         
-    <div class="container">
-        <a class="navbar-brand" href="{{ url_for('index') }}">
-            <i class="fas fa-book-open me-2"></i>AlfaAmigo
-        </a>
-        <div class="d-flex align-items-center">
+  
             {% if user %}
                 <span class="navbar-text me-3">
                     <i class="fas fa-fire text-warning"></i> Racha: {{ user.streak }} días
