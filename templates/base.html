@@ -41,6 +41,13 @@
                 <a href="{{ url_for('logout') }}" class="btn btn-outline-light">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
+<div class="text-center my-4">
+    <a href="{{ url_for('descargar_app') }}" class="btn btn-success btn-lg">
+        <i class="fas fa-download me-2"></i> Descargar App Móvil
+    </a>
+    <p class="text-muted mt-2">Versión 1.0 - Android</p>
+</div>
+            
             {% else %}
                 <a href="{{ url_for('register') }}" class="btn btn-outline-light me-2">
                     <i class="fas fa-user-plus"></i> Registrarse
