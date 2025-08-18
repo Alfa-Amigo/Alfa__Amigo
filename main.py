@@ -1,17 +1,19 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 import json
 from pathlib import Path
 import os
 
+# Inicialización de la aplicación
 app = Flask(__name__)
-app.secret_key = 'clave_secreta_temporal'  # Cambia esto en producción
+app.secret_key = os.environ.get('SECRET_KEY') or 'tu_clave_secreta_super_segura_aqui'
 
 # Configuración de rutas
 BASE_DIR = Path(__file__).parent
 LESSONS_FILE = BASE_DIR / 'static' / 'data' / 'lessons.json'
 
-# Datos en memoria (simulan la base de datos)
+# Datos en memoria (simulan DB)
 users = {
     'admin': {
         'password': generate_password_hash('admin123'),
@@ -27,7 +29,8 @@ def load_lessons():
     try:
         with open(LESSONS_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
-    except:
+    except Exception as e:
+        print(f"Error cargando lecciones: {str(e)}")
         return []
 
 LESSONS = load_lessons()
@@ -38,8 +41,9 @@ CATEGORY_ICONS = {
     'Vocabulario': 'language'
 }
 
-# Decorador para rutas protegidas
+# Decorador login_required con manejo de endpoints únicos
 def login_required(f):
+    @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in session:
             flash('🔒 Por favor inicia sesión para acceder', 'warning')
@@ -47,10 +51,10 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Rutas principales
+# Rutas con endpoints únicos
 @app.route('/')
 @login_required
-def index():
+def home():
     user = users.get(session['username'])
     return render_template('index.html',
         user=user,
@@ -62,15 +66,15 @@ def index():
 
 @app.route('/profile')
 @login_required
-def profile():
+def profile_page():  # Nombre único
     user = users.get(session['username'])
+    completed = user.get('completed_lessons', [])
     return render_template('profile.html',
         user=user,
         lessons=LESSONS,
-        completed_lessons=user.get('completed_lessons', [])
+        completed_lessons=completed
     )
 
-# Autenticación
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -82,7 +86,7 @@ def login():
         if user and check_password_hash(user['password'], password):
             session['username'] = username
             flash(f'👋 ¡Bienvenido {username}!', 'success')
-            return redirect(url_for('index'))
+            return redirect(url_for('home'))
         
         flash('❌ Usuario o contraseña incorrectos', 'danger')
     
@@ -93,13 +97,13 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
-        confirm_password = request.form.get('confirm_password', '').strip()
+        confirm = request.form.get('confirm_password', '').strip()
 
         if len(username) < 4:
-            flash('El usuario debe tener al menos 4 caracteres', 'danger')
+            flash('Usuario muy corto (mínimo 4 caracteres)', 'danger')
         elif len(password) < 6:
-            flash('La contraseña debe tener al menos 6 caracteres', 'danger')
-        elif password != confirm_password:
+            flash('Contraseña muy corta (mínimo 6 caracteres)', 'danger')
+        elif password != confirm:
             flash('Las contraseñas no coinciden', 'danger')
         elif username in users:
             flash('El usuario ya existe', 'danger')
@@ -116,23 +120,22 @@ def register():
     
     return render_template('register.html')
 
-# Sistema de lecciones
 @app.route('/lesson/<int:lesson_id>')
 @login_required
-def lesson_detail(lesson_id):
+def view_lesson(lesson_id):  # Nombre único
     lesson = next((l for l in LESSONS if l['id'] == lesson_id), None)
     if not lesson:
         flash('Lección no encontrada', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('home'))
     return render_template('lesson_detail.html', lesson=lesson)
 
 @app.route('/lesson/<int:lesson_id>/quiz', methods=['GET', 'POST'])
 @login_required
-def quiz(lesson_id):
+def take_quiz(lesson_id):  # Nombre único
     lesson = next((l for l in LESSONS if l['id'] == lesson_id), None)
     if not lesson:
         flash('Lección no encontrada', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('home'))
     
     if request.method == 'POST':
         score = sum(
@@ -140,22 +143,23 @@ def quiz(lesson_id):
             if request.form.get(f'q{q["id"]}') == q['correct_answer']
         )
         
-        # Actualizar datos del usuario
         user = users[session['username']]
         user['xp'] += score * 10
         if lesson_id not in user['completed_lessons']:
             user['completed_lessons'].append(lesson_id)
         
-        return redirect(url_for('quiz_result', lesson_id=lesson_id, score=score))
+        return redirect(url_for('quiz_results', lesson_id=lesson_id, score=score))
     
     return render_template('quiz.html', lesson=lesson)
 
 @app.route('/lesson/<int:lesson_id>/result')
 @login_required
-def quiz_result(lesson_id):
+def quiz_results(lesson_id):  # Nombre único
     lesson = next((l for l in LESSONS if l['id'] == lesson_id), None)
     score = request.args.get('score', 0)
-    return render_template('quiz_result.html', lesson=lesson, score=int(score))
+    return render_template('quiz_result.html', 
+                         lesson=lesson, 
+                         score=int(score))
 
 @app.route('/logout')
 def logout():
@@ -163,5 +167,6 @@ def logout():
     flash('👋 ¡Sesión cerrada correctamente!', 'info')
     return redirect(url_for('login'))
 
+# Punto de entrada para Render.com
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
