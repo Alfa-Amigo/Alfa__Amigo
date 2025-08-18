@@ -3,12 +3,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import sqlite3
 import os
+import json
 from datetime import datetime
 from pathlib import Path
 
 # Configuración inicial
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'tu_clave_secreta_super_segura_2025')
+app.secret_key = os.environ.get('SECRET_KEY', 'tu_super_clave_secreta_2025!')
 app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 1 día en segundos
 
 # Configuración de rutas
@@ -47,6 +48,7 @@ def init_db():
         db = get_db()
         cursor = db.cursor()
         
+        # Tabla de usuarios
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,6 +61,7 @@ def init_db():
             )
         ''')
         
+        # Tabla de progreso
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_lessons (
                 user_id INTEGER,
@@ -138,7 +141,7 @@ def profile():
         total_lessons=total_lessons
     )
 
-# Sistema de autenticación mejorado
+# Sistema de autenticación
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -180,12 +183,16 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
         
+        # Validaciones mejoradas
         errors = []
         if len(username) < 4:
             errors.append("El usuario debe tener al menos 4 caracteres")
         if len(password) < 6:
             errors.append("La contraseña debe tener al menos 6 caracteres")
+        if password != confirm_password:
+            errors.append("Las contraseñas no coinciden")
         
         if errors:
             for error in errors:
@@ -205,6 +212,8 @@ def register():
             flash('⛔ El usuario ya existe', 'danger')
         except Exception as e:
             flash(f'❌ Error en el registro: {str(e)}', 'danger')
+        
+        return render_template('register.html', username=username)
     
     return render_template('register.html')
 
@@ -218,6 +227,7 @@ def logout():
 with app.app_context():
     init_db()
     
+    # Crear usuario admin si no existe
     db = get_db()
     if not db.execute('SELECT 1 FROM users WHERE username = "admin"').fetchone():
         db.execute(
