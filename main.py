@@ -214,7 +214,15 @@ def register():
             flash('❌ Error al crear la cuenta', 'danger')
 
     return render_template('register.html')
-
+@app.route('/lesson/<int:lesson_id>')
+@login_required
+def lesson_detail(lesson_id):
+    lesson = next((l for l in LESSONS if l['id'] == lesson_id), None)
+    if not lesson:
+        flash('Lección no encontrada', 'danger')
+        return redirect(url_for('index'))
+    
+    return render_template('lesson_detail.html', lesson=lesson)
 @app.route('/logout')
 def logout():
     session.clear()
@@ -234,6 +242,8 @@ with app.app_context():
         )
         db.commit()
         print("👨‍💻 Usuario admin creado: admin / admin123")
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
