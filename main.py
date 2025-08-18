@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 import os
 from pathlib import Path
+from flask import send_from_directory
 
 # Inicialización de la aplicación
 app = Flask(__name__)
@@ -67,7 +68,14 @@ def inject_global_data():
 
 # Rutas principales
 
-
+@app.route('/descargar-app')
+def descargar_app():
+    return send_from_directory(
+        directory=os.path.join(app.root_path, 'public/static/downloads'),
+        path='tu_app.apk',  # Cambia por el nombre real de tu APK
+        as_attachment=True,
+        mimetype='application/vnd.android.package-archive'
+    )
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
