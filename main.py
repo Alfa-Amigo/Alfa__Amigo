@@ -9,16 +9,17 @@ from pathlib import Path
 
 # Configuración inicial
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY') or os.urandom(24)
+app.secret_key = os.environ.get('SECRET_KEY') or 'una_clave_secreta_muy_segura'
 app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 1 día en segundos
 
 # Configuración de rutas
 BASE_DIR = Path(__file__).parent
 app.config['DATABASE'] = BASE_DIR / 'data' / 'app.db'
-app.config['LESSONS_FILE'] = BASE_DIR / 'data' / 'lessons.json'
+app.config['LESSONS_FILE'] = BASE_DIR / 'static' / 'data' / 'lessons.json'
 
-# Crear directorio de datos si no existe
+# Crear directorios necesarios
 os.makedirs(BASE_DIR / 'data', exist_ok=True)
+os.makedirs(BASE_DIR / 'static' / 'data', exist_ok=True)
 
 # Cargar lecciones desde JSON
 def load_lessons():
@@ -35,8 +36,21 @@ def load_lessons():
                 "title": "Lección de Ejemplo",
                 "description": "Esta es una lección de ejemplo",
                 "category": "Ejemplo",
-                "content": [],
-                "quiz": []
+                "icon": "question-circle",
+                "content": [
+                    {
+                        "type": "text",
+                        "content": "Contenido de ejemplo para la lección demo"
+                    }
+                ],
+                "quiz": [
+                    {
+                        "id": 1,
+                        "question": "Pregunta de ejemplo",
+                        "options": ["Opción 1", "Opción 2", "Opción 3"],
+                        "correct_answer": "Opción 1"
+                    }
+                ]
             }
         ]
     except Exception as e:
@@ -122,22 +136,11 @@ def index():
     ).fetchall()
     completed_ids = [row['lesson_id'] for row in completed_lessons]
     
-    # Obtener mejor puntaje para cada lección
-    progress = db.execute('''
-        SELECT lesson_id, MAX(score) as best_score 
-        FROM user_lessons 
-        WHERE user_id = ?
-        GROUP BY lesson_id
-    ''', (session['user_id'],)).fetchall()
-    
-    progress_dict = {row['lesson_id']: row['best_score'] for row in progress}
-    
     return render_template('index.html',
         user=dict(user),
         lessons=LESSONS,
         categories=CATEGORIES,
         category_icons=CATEGORY_ICONS,
-        progress=progress_dict,
         completed_lessons=completed_ids
     )
 
@@ -147,25 +150,16 @@ def profile():
     db = get_db()
     user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
     
-    completed_lessons = db.execute('''
-        SELECT ul.lesson_id, ul.score, l.title, l.category 
-        FROM user_lessons ul
-        JOIN (SELECT id, title, category FROM json_each(?)) l 
-        ON ul.lesson_id = l.id
-        WHERE ul.user_id = ? AND ul.completed = 1
-        ORDER BY ul.completed_at DESC
-    ''', (json.dumps(LESSONS), session['user_id'])).fetchall()
-    
-    total_lessons = len(LESSONS)
-    completed_count = len(completed_lessons)
-    progress_percent = round((completed_count / total_lessons) * 100) if total_lessons > 0 else 0
+    completed_lessons = db.execute(
+        'SELECT lesson_id FROM user_lessons WHERE user_id = ? AND completed = 1',
+        (session['user_id'],)
+    ).fetchall()
+    completed_ids = [row['lesson_id'] for row in completed_lessons]
     
     return render_template('profile.html',
         user=dict(user),
-        completed_lessons=completed_lessons,
-        progress=progress_percent,
-        total_lessons=total_lessons,
-        lessons=LESSONS
+        lessons=LESSONS,
+        completed_lessons=completed_ids
     )
 
 # Sistema de autenticación
@@ -295,6 +289,8 @@ def quiz(lesson_id):
         except Exception as e:
             print(f"Error guardando resultados: {e}")
             db.rollback()
+            flash('Error al guardar los resultados del quiz', 'danger')
+            return redirect(url_for('lesson_detail', lesson_id=lesson_id))
         
         return redirect(url_for('quiz_result', lesson_id=lesson_id))
     
@@ -328,31 +324,6 @@ def logout():
     flash('👋 ¡Sesión cerrada correctamente!', 'info')
     return redirect(url_for('login'))
 
-# API para estadísticas (opcional)
-@app.route('/api/stats')
-@login_required
-def api_stats():
-    db = get_db()
-    
-    # Obtener estadísticas del usuario
-    user_stats = db.execute(
-        'SELECT streak, xp FROM users WHERE id = ?',
-        (session['user_id'],)
-    ).fetchone()
-    
-    # Obtener progreso en lecciones
-    lesson_progress = db.execute(
-        'SELECT COUNT(*) as completed FROM user_lessons WHERE user_id = ? AND completed = 1',
-        (session['user_id'],)
-    ).fetchone()
-    
-    return jsonify({
-        'streak': user_stats['streak'],
-        'xp': user_stats['xp'],
-        'completed_lessons': lesson_progress['completed'],
-        'total_lessons': len(LESSONS)
-    })
-
 # Inicialización
 with app.app_context():
     init_db()
@@ -361,7 +332,7 @@ with app.app_context():
     if os.environ.get('FLASK_ENV') == 'development':
         db = get_db()
         if not db.execute('SELECT 1 FROM users WHERE username = "admin"').fetchone():
-            admin_pass = os.environ.get('ADMIN_PASS') or 'admin123'
+            admin_pass = 'admin123'
             db.execute(
                 "INSERT INTO users (username, name, password, streak, xp) VALUES (?, ?, ?, ?, ?)",
                 ("admin", "Administrador", generate_password_hash(admin_pass), 5, 100)
@@ -370,4 +341,4 @@ with app.app_context():
             print(f"👨‍💻 Usuario admin creado: admin / {admin_pass}")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=os.environ.get('FLASK_ENV') == 'development')
+    app.run(host='0.0.0.0', port=5000, debug=True)
