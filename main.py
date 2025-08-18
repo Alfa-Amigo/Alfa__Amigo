@@ -72,7 +72,7 @@ def inject_global_data():
 def descargar_app():
     return send_from_directory(
         directory=os.path.join(app.root_path, 'public/static/downloads'),
-        path='tu_app.apk',  # Cambia por el nombre real de tu APK
+        path='Alfa Amigo.apk',  # Cambia por el nombre real de tu APK
         as_attachment=True,
         mimetype='application/vnd.android.package-archive'
     )
