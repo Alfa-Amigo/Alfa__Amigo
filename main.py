@@ -184,8 +184,8 @@ def register():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
         confirm_password = request.form.get('confirm_password', '').strip()
-        
-        # Validaciones mejoradas
+
+        # Validaciones
         errors = []
         if len(username) < 4:
             errors.append("El usuario debe tener al menos 4 caracteres")
@@ -193,17 +193,17 @@ def register():
             errors.append("La contraseña debe tener al menos 6 caracteres")
         if password != confirm_password:
             errors.append("Las contraseñas no coinciden")
-        
+
         if errors:
             for error in errors:
                 flash(error, 'danger')
             return render_template('register.html', username=username)
-        
+
         db = get_db()
         try:
             db.execute(
                 'INSERT INTO users (username, password) VALUES (?, ?)',
-                (username, generate_password_hash(password, method='pbkdf2:sha256'))
+                (username, generate_password_hash(password))
             )
             db.commit()
             flash('✅ ¡Registro exitoso! Por favor inicia sesión', 'success')
@@ -211,10 +211,8 @@ def register():
         except sqlite3.IntegrityError:
             flash('⛔ El usuario ya existe', 'danger')
         except Exception as e:
-            flash(f'❌ Error en el registro: {str(e)}', 'danger')
-        
-        return render_template('register.html', username=username)
-    
+            flash('❌ Error al crear la cuenta', 'danger')
+
     return render_template('register.html')
 
 @app.route('/logout')
