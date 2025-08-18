@@ -1,5 +1,4 @@
-
-from flask import Flask, render_template, request, redirect, url_for, session, g, flash
+from flask import Flask, render_template, request, redirect, url_for, session, g, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import sqlite3
@@ -10,13 +9,16 @@ from pathlib import Path
 
 # Configuración inicial
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'tu_super_clave_secreta_2025!')
+app.secret_key = os.environ.get('SECRET_KEY') or os.urandom(24)
 app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 1 día en segundos
 
 # Configuración de rutas
 BASE_DIR = Path(__file__).parent
-app.config['DATABASE'] = BASE_DIR / 'app.db'
-app.config['LESSONS_FILE'] = BASE_DIR / 'lessons.json'
+app.config['DATABASE'] = BASE_DIR / 'data' / 'app.db'
+app.config['LESSONS_FILE'] = BASE_DIR / 'data' / 'lessons.json'
+
+# Crear directorio de datos si no existe
+os.makedirs(BASE_DIR / 'data', exist_ok=True)
 
 # Cargar lecciones desde JSON
 def load_lessons():
@@ -25,6 +27,18 @@ def load_lessons():
             lessons = json.load(f)
             print(f"✅ Lecciones cargadas: {len(lessons)} encontradas")
             return lessons
+    except FileNotFoundError:
+        print("⚠️ Archivo lessons.json no encontrado, usando datos de ejemplo")
+        return [
+            {
+                "id": 0,
+                "title": "Lección de Ejemplo",
+                "description": "Esta es una lección de ejemplo",
+                "category": "Ejemplo",
+                "content": [],
+                "quiz": []
+            }
+        ]
     except Exception as e:
         print(f"❌ Error cargando lessons.json: {e}")
         return []
@@ -34,7 +48,8 @@ CATEGORIES = sorted({lesson['category'] for lesson in LESSONS})
 CATEGORY_ICONS = {
     'Lectura': 'book',
     'Matemáticas': 'calculator',
-    'Vocabulario': 'language'
+    'Vocabulario': 'language',
+    'Ejemplo': 'question-circle'
 }
 
 # Configuración de la base de datos
@@ -105,25 +120,25 @@ def index():
         'SELECT lesson_id FROM user_lessons WHERE user_id = ? AND completed = 1',
         (session['user_id'],)
     ).fetchall()
+    completed_ids = [row['lesson_id'] for row in completed_lessons]
     
-    completed_lesson_ids = [row['lesson_id'] for row in completed_lessons]
+    # Obtener mejor puntaje para cada lección
+    progress = db.execute('''
+        SELECT lesson_id, MAX(score) as best_score 
+        FROM user_lessons 
+        WHERE user_id = ?
+        GROUP BY lesson_id
+    ''', (session['user_id'],)).fetchall()
     
-    # Crear objeto user con todos los datos necesarios
-    user_data = {
-        'id': user['id'],
-        'username': user['username'],
-        'name': user.get('name', user['username']),  # Usamos el nombre si existe, sino el username
-        'streak': user['streak'],
-        'xp': user['xp'],
-        'joined': user['joined'],
-        'completed_lessons': completed_lesson_ids
-    }
+    progress_dict = {row['lesson_id']: row['best_score'] for row in progress}
     
     return render_template('index.html',
-        user=user_data,
+        user=dict(user),
         lessons=LESSONS,
         categories=CATEGORIES,
-        category_icons=CATEGORY_ICONS
+        category_icons=CATEGORY_ICONS,
+        progress=progress_dict,
+        completed_lessons=completed_ids
     )
 
 @app.route('/profile')
@@ -132,36 +147,25 @@ def profile():
     db = get_db()
     user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
     
-    # Obtener lecciones completadas con detalles
     completed_lessons = db.execute('''
-        SELECT lesson_id FROM user_lessons 
-        WHERE user_id = ? AND completed = 1
-        ORDER BY completed_at DESC
-    ''', (session['user_id'],)).fetchall()
+        SELECT ul.lesson_id, ul.score, l.title, l.category 
+        FROM user_lessons ul
+        JOIN (SELECT id, title, category FROM json_each(?)) l 
+        ON ul.lesson_id = l.id
+        WHERE ul.user_id = ? AND ul.completed = 1
+        ORDER BY ul.completed_at DESC
+    ''', (json.dumps(LESSONS), session['user_id'])).fetchall()
     
-    completed_lesson_ids = [row['lesson_id'] for row in completed_lessons]
-    
-    # Filtrar lecciones completadas
-    completed_with_details = []
-    for lesson in LESSONS:
-        if lesson['id'] in completed_lesson_ids:
-            completed_with_details.append(lesson)
-    
-    # Crear objeto user con todos los datos necesarios
-    user_data = {
-        'id': user['id'],
-        'username': user['username'],
-        'name': user.get('name', user['username']),
-        'streak': user['streak'],
-        'xp': user['xp'],
-        'joined': user['joined'],
-        'completed_lessons': completed_lesson_ids
-    }
+    total_lessons = len(LESSONS)
+    completed_count = len(completed_lessons)
+    progress_percent = round((completed_count / total_lessons) * 100) if total_lessons > 0 else 0
     
     return render_template('profile.html',
-        user=user_data,
-        lessons=LESSONS,
-        completed_lessons=completed_with_details
+        user=dict(user),
+        completed_lessons=completed_lessons,
+        progress=progress_percent,
+        total_lessons=total_lessons,
+        lessons=LESSONS
     )
 
 # Sistema de autenticación
@@ -186,7 +190,7 @@ def login():
             session['user_id'] = user['id']
             session.permanent = True
             
-            # Actualizar último login y posiblemente la racha
+            # Actualizar última conexión y racha
             db.execute(
                 'UPDATE users SET last_login = datetime("now") WHERE id = ?',
                 (user['id'],)
@@ -206,6 +210,7 @@ def login():
 def register():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
+        name = request.form.get('name', username).strip()
         password = request.form.get('password', '').strip()
         confirm_password = request.form.get('confirm_password', '').strip()
 
@@ -221,13 +226,13 @@ def register():
         if errors:
             for error in errors:
                 flash(error, 'danger')
-            return render_template('register.html', username=username)
+            return render_template('register.html', username=username, name=name)
 
         db = get_db()
         try:
             db.execute(
-                'INSERT INTO users (username, password, name) VALUES (?, ?, ?)',
-                (username, generate_password_hash(password), username)
+                'INSERT INTO users (username, name, password) VALUES (?, ?, ?)',
+                (username, name, generate_password_hash(password))
             )
             db.commit()
             flash('✅ ¡Registro exitoso! Por favor inicia sesión', 'success')
@@ -239,6 +244,7 @@ def register():
 
     return render_template('register.html')
 
+# Sistema de lecciones
 @app.route('/lesson/<int:lesson_id>')
 @login_required
 def lesson_detail(lesson_id):
@@ -249,7 +255,7 @@ def lesson_detail(lesson_id):
     
     return render_template('lesson_detail.html', lesson=lesson)
 
-@app.route('/quiz/<int:lesson_id>', methods=['GET', 'POST'])
+@app.route('/lesson/<int:lesson_id>/quiz', methods=['GET', 'POST'])
 @login_required
 def quiz(lesson_id):
     lesson = next((l for l in LESSONS if l['id'] == lesson_id), None)
@@ -260,8 +266,12 @@ def quiz(lesson_id):
     if request.method == 'POST':
         # Calcular puntaje
         score = 0
+        answers = {}
+        
         for question in lesson['quiz']:
             user_answer = request.form.get(f'q{question["id"]}')
+            answers[question["id"]] = user_answer
+            
             if user_answer == question['correct_answer']:
                 score += 1
         
@@ -275,33 +285,42 @@ def quiz(lesson_id):
                 (session['user_id'], lesson_id, score)
             )
             
-            # Actualizar XP del usuario (10 puntos por respuesta correcta)
-            xp_gained = score * 10
+            # Actualizar XP del usuario
             db.execute(
                 'UPDATE users SET xp = xp + ? WHERE id = ?',
-                (xp_gained, session['user_id'])
+                (score * 10, session['user_id'])
             )
             
             db.commit()
-            
-            return redirect(url_for('quiz_result', lesson_id=lesson_id, score=score))
         except Exception as e:
-            flash('Error al guardar los resultados', 'danger')
-            print(f"Error: {e}")
+            print(f"Error guardando resultados: {e}")
+            db.rollback()
+        
+        return redirect(url_for('quiz_result', lesson_id=lesson_id))
     
     return render_template('quiz.html', lesson=lesson)
 
-@app.route('/quiz/<int:lesson_id>/result')
+@app.route('/lesson/<int:lesson_id>/result')
 @login_required
 def quiz_result(lesson_id):
     lesson = next((l for l in LESSONS if l['id'] == lesson_id), None)
-    score = request.args.get('score', 0, type=int)
-    
     if not lesson:
         flash('Lección no encontrada', 'danger')
         return redirect(url_for('index'))
     
-    return render_template('quiz_result.html', lesson=lesson, score=score)
+    db = get_db()
+    result = db.execute(
+        'SELECT score FROM user_lessons WHERE user_id = ? AND lesson_id = ?',
+        (session['user_id'], lesson_id)
+    ).fetchone()
+    
+    if not result:
+        flash('No hay resultados para esta lección', 'warning')
+        return redirect(url_for('lesson_detail', lesson_id=lesson_id))
+    
+    return render_template('quiz_result.html', 
+                         lesson=lesson, 
+                         score=result['score'])
 
 @app.route('/logout')
 def logout():
@@ -309,19 +328,46 @@ def logout():
     flash('👋 ¡Sesión cerrada correctamente!', 'info')
     return redirect(url_for('login'))
 
+# API para estadísticas (opcional)
+@app.route('/api/stats')
+@login_required
+def api_stats():
+    db = get_db()
+    
+    # Obtener estadísticas del usuario
+    user_stats = db.execute(
+        'SELECT streak, xp FROM users WHERE id = ?',
+        (session['user_id'],)
+    ).fetchone()
+    
+    # Obtener progreso en lecciones
+    lesson_progress = db.execute(
+        'SELECT COUNT(*) as completed FROM user_lessons WHERE user_id = ? AND completed = 1',
+        (session['user_id'],)
+    ).fetchone()
+    
+    return jsonify({
+        'streak': user_stats['streak'],
+        'xp': user_stats['xp'],
+        'completed_lessons': lesson_progress['completed'],
+        'total_lessons': len(LESSONS)
+    })
+
 # Inicialización
 with app.app_context():
     init_db()
     
-    # Crear usuario admin si no existe
-    db = get_db()
-    if not db.execute('SELECT 1 FROM users WHERE username = "admin"').fetchone():
-        db.execute(
-            "INSERT INTO users (username, password, name, streak, xp) VALUES (?, ?, ?, ?, ?)",
-            ("admin", generate_password_hash("admin123"), "Administrador", 5, 100)
-        )
-        db.commit()
-        print("👨‍💻 Usuario admin creado: admin / admin123")
+    # Crear usuario admin si no existe (solo en desarrollo)
+    if os.environ.get('FLASK_ENV') == 'development':
+        db = get_db()
+        if not db.execute('SELECT 1 FROM users WHERE username = "admin"').fetchone():
+            admin_pass = os.environ.get('ADMIN_PASS') or 'admin123'
+            db.execute(
+                "INSERT INTO users (username, name, password, streak, xp) VALUES (?, ?, ?, ?, ?)",
+                ("admin", "Administrador", generate_password_hash(admin_pass), 5, 100)
+            )
+            db.commit()
+            print(f"👨‍💻 Usuario admin creado: admin / {admin_pass}")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=os.environ.get('FLASK_ENV') == 'development')
