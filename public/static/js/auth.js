@@ -1,43 +1,36 @@
+// auth.js - Versión modificada para Flask
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
     
     if (loginForm) {
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
+        loginForm.addEventListener('submit', function(e) {
+            // Mostrar estado de carga
             const submitBtn = this.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Verificando...';
             
-            const formData = new FormData(this);
+            // Ocultar mensajes de error previos
             const errorElement = document.getElementById('loginError');
-            
-            try {
-                const response = await fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    redirect: 'manual'  // Importante para manejar redirecciones
-                });
-                
-                if (response.type === 'opaqueredirect') {
-                    // Redirección manual para SPA
-                    window.location.href = response.url;
-                } else if (response.ok) {
-                    const data = await response.json();
-                    if (data.redirect) {
-                        window.location.href = data.redirect;
-                    }
-                } else {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Error en el login');
-                }
-            } catch (error) {
-                errorElement.textContent = error.message;
-                errorElement.classList.remove('d-none');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Ingresar';
+            if (errorElement) {
+                errorElement.classList.add('d-none');
             }
+            
+            // Enviar el formulario de forma tradicional
+            // Flask manejará la redirección después del login
+            // No necesitamos preventDefault() porque queremos el comportamiento normal
+            
+            // Solo como fallback, si después de 5 segundos no hubo redirección
+            setTimeout(() => {
+                if (submitBtn.disabled) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    if (errorElement) {
+                        errorElement.textContent = "El servidor está tardando demasiado. Intenta nuevamente.";
+                        errorElement.classList.remove('d-none');
+                    }
+                }
+            }, 5000);
         });
     }
 });
