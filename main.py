@@ -56,6 +56,7 @@ lessons = load_lessons()
 def inject_global_data():
     return {
         'user': session.get('user'),
+        'version': session.get('version', 'adults'),  # Default a adultos
         'categories': sorted({l.get('category', 'General') for l in lessons}),
         'category_icons': {
             'Lectura': 'book-open',
@@ -76,9 +77,23 @@ def descargar_app():
         as_attachment=True,
         mimetype='application/vnd.android.package-archive'
     )
+
+@app.route('/set_version/<version>')
+def set_version(version):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    if version in ['kids', 'adults']:
+        session['version'] = version
+        session.modified = True
+        return redirect(request.referrer or url_for('index'))
+    
+    return redirect(url_for('index'))
+
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
+
 @app.route('/')
 def index():
     if 'user' not in session:
@@ -168,8 +183,9 @@ def profile():
 @app.route('/logout')
 def logout():
     session.pop('user', None)
+    session.pop('version', None)
     return redirect(url_for('login'))
 
 # Configuración para producción
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)  # Puedes usar el puerto 8080 o cambiar a 5000 si prefieres
+    app.run(host='0.0.0.0', port=8080)
