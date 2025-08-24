@@ -1,0 +1,119 @@
+/* ===== ESTILOS NEON EXTREMOS ===== */
+body.version-kids {
+    background: linear-gradient(135deg, #000000 0%, #220033 50%, #000000 100%) !important;
+    min-height: 100vh !important;
+    color: #ffffff !important;
+    font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif !important;
+}
+
+/* NAVBAR NEON BRUTAL */
+body.version-kids .navbar {
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 50%, #ff0080 100%) !important;
+    box-shadow: 0 0 50px #ff00ff, 0 0 80px #00ffff !important;
+    border-bottom: 4px solid #00ffff !important;
+    animation: neonNavbar 1.5s infinite alternate !important;
+}
+
+@keyframes neonNavbar {
+    0% { 
+        box-shadow: 0 0 50px #ff00ff, 0 0 80px #00ffff; 
+        background: linear-gradient(135deg, #ff00ff 0%, #00ffff 50%, #ff0080 100%) !important;
+    }
+    100% { 
+        box-shadow: 0 0 70px #ff00ff, 0 0 100px #00ffff, 0 0 120px #ff0080; 
+        background: linear-gradient(135deg, #00ffff 0%, #ff0080 50%, #ff00ff 100%) !important;
+    }
+}
+
+/* BOTONES SELECTOR NEON */
+.version-selector .btn-kids {
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%) !important;
+    color: #000000 !important;
+    border: 3px solid #00ffff !important;
+    box-shadow: 0 0 20px #ff00ff, 0 0 30px #00ffff !important;
+    font-weight: 900 !important;
+    text-shadow: 0 0 10px #ffffff !important;
+    animation: buttonPulse 2s infinite !important;
+}
+
+.version-selector .btn-kids-active {
+    background: linear-gradient(135deg, #ff0080 0%, #ff00ff 100%) !important;
+    color: #ffffff !important;
+    border: 3px solid #ffffff !important;
+    box-shadow: 0 0 30px #ff00ff, 0 0 50px #ff0080 !important;
+    animation: activeButtonPulse 1s infinite !important;
+}
+
+@keyframes buttonPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 20px #ff00ff, 0 0 30px #00ffff; }
+    50% { transform: scale(1.05); box-shadow: 0 0 30px #ff00ff, 0 0 40px #00ffff; }
+}
+
+@keyframes activeButtonPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 30px #ff00ff, 0 0 50px #ff0080; }
+    50% { transform: scale(1.1); box-shadow: 0 0 40px #ff00ff, 0 0 60px #ff0080; }
+}
+
+/* TEXTO NEON */
+body.version-kids .navbar-brand {
+    color: #000000 !important;
+    font-weight: 900 !important;
+    text-shadow: 0 0 10px #ffffff, 0 0 20px #ff00ff, 0 0 30px #00ffff !important;
+    font-size: 2rem !important;
+    animation: textGlow 2s infinite alternate !important;
+}
+
+@keyframes textGlow {
+    0% { text-shadow: 0 0 10px #ffffff, 0 0 20px #ff00ff, 0 0 30px #00ffff; }
+    100% { text-shadow: 0 0 15px #ffffff, 0 0 30px #ff00ff, 0 0 45px #00ffff; }
+}
+
+/* ===== ESTILOS ADULTOS MINIMALISTAS ===== */
+body.version-adults .navbar {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
+    border-bottom: 1px solid #444 !important;
+}
+
+body.version-adults .navbar-brand {
+    color: #ffffff !important;
+    font-weight: 300 !important;
+    letter-spacing: 1px !important;
+}
+
+/* ===== DEBUG SUPER VISIBLE ===== */
+body::after {
+    content: "⚡ NEON ACTIVO - {{ version }}" !important;
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    background: linear-gradient(135deg, #ff00ff, #00ffff) !important;
+    color: #000000 !important;
+    padding: 15px 20px !important;
+    border-radius: 10px !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    z-index: 9999 !important;
+    box-shadow: 0 0 30px #ff00ff !important;
+    border: 3px solid #ffffff !important;
+    text-shadow: 0 0 5px #ffffff !important;
+    animation: debugPulse 1s infinite alternate !important;
+}
+
+@keyframes debugPulse {
+    0% { transform: scale(1); box-shadow: 0 0 30px #ff00ff; }
+    100% { transform: scale(1.05); box-shadow: 0 0 40px #ff00ff, 0 0 50px #00ffff; }
+}
+
+/* BORDE DE CONFIRMACIÓN */
+body {
+    border: 5px solid #ff00ff !important;
+    animation: borderFlash 2s infinite !important;
+}
+
+@keyframes borderFlash {
+    0%, 100% { border-color: #ff00ff; }
+    25% { border-color: #00ffff; }
+    50% { border-color: #ff0080; }
+    75% { border-color: #ffff00; }
+}
