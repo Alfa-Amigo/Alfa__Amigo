@@ -12,267 +12,239 @@
 
 /* ===== SELECTOR DE VERSIÓN ===== */
 .version-selector .btn {
-    border: 2px solid transparent;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    border: 2px solid transparent !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
 }
 
-/* Botón Niños - Inactivo */
 .version-selector .btn-kids {
-    background: linear-gradient(135deg, #FFD166 0%, #FF9E66 100%);
-    color: #333;
-    border-color: #FF9E66;
+    background: linear-gradient(135deg, #FFD166 0%, #FF9E66 100%) !important;
+    color: #333 !important;
+    border-color: #FF9E66 !important;
 }
 
 .version-selector .btn-kids:hover {
-    background: linear-gradient(135deg, #FFB74D 0%, #FF8E50 100%);
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #FFB74D 0%, #FF8E50 100%) !important;
+    transform: translateY(-2px) !important;
 }
 
-/* Botón Niños - Activo */
 .version-selector .btn-kids-active {
-    background: linear-gradient(135deg, #FF6B8B 0%, #FF8E6B 100%);
-    color: white;
-    border-color: white;
-    box-shadow: 0 0 15px rgba(255, 107, 139, 0.5);
+    background: linear-gradient(135deg, #FF6B8B 0%, #FF8E6B 100%) !important;
+    color: white !important;
+    border-color: white !important;
+    box-shadow: 0 0 15px rgba(255, 107, 139, 0.5) !important;
 }
 
-/* Botón Adultos - Inactivo */
 .version-selector .btn-adults {
-    background: linear-gradient(135deg, #90A4AE 0%, #78909C 100%);
-    color: white;
-    border-color: #78909C;
+    background: linear-gradient(135deg, #90A4AE 0%, #78909C 100%) !important;
+    color: white !important;
+    border-color: #78909C !important;
 }
 
 .version-selector .btn-adults:hover {
-    background: linear-gradient(135deg, #78909C 0%, #546E7A 100%);
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #78909C 0%, #546E7A 100%) !important;
+    transform: translateY(-2px) !important;
 }
 
-/* Botón Adultos - Activo */
 .version-selector .btn-adults-active {
-    background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
-    color: white;
-    border-color: white;
-    box-shadow: 0 0 15px rgba(44, 62, 80, 0.5);
+    background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%) !important;
+    color: white !important;
+    border-color: white !important;
+    box-shadow: 0 0 15px rgba(44, 62, 80, 0.5) !important;
 }
 
 /* ===== ESTILOS MODERNOS PARA NIÑOS ===== */
 body.version-kids {
-  /* Paleta de colores vibrantes y modernos */
-  --color-primary: #FF6B8B;
-  --color-primary-dark: #FF4D6D;
-  --color-secondary: #4ECDC4;
-  --color-accent: #FFE66D;
-  --color-success: #1DD1A1;
-  --color-warning: #FF9E66;
-  --color-light: #FFF9F2;
-  --gradient-primary: linear-gradient(135deg, #FF6B8B 0%, #FF8E6B 100%);
-  --gradient-secondary: linear-gradient(135deg, #4ECDC4 0%, #6AECFF 100%);
-  --gradient-accent: linear-gradient(135deg, #FFE66D 0%, #FFB347 100%);
+  --color-primary: #FF6B8B !important;
+  --color-primary-dark: #FF4D6D !important;
+  --color-secondary: #4ECDC4 !important;
+  --color-accent: #FFE66D !important;
+  --color-success: #1DD1A1 !important;
+  --color-warning: #FF9E66 !important;
+  --color-light: #FFF9F2 !important;
+  --gradient-primary: linear-gradient(135deg, #FF6B8B 0%, #FF8E6B 100%) !important;
+  --gradient-secondary: linear-gradient(135deg, #4ECDC4 0%, #6AECFF 100%) !important;
+  --gradient-accent: linear-gradient(135deg, #FFE66D 0%, #FFB347 100%) !important;
 }
 
 body.version-kids {
-  background: linear-gradient(135deg, #FFF9F2 0%, #FFFFFF 50%, #E6F7FF 100%);
-  min-height: 100vh;
+  background: linear-gradient(135deg, #FFF9F2 0%, #FFFFFF 50%, #E6F7FF 100%) !important;
+  min-height: 100vh !important;
 }
 
 body.version-kids .navbar {
   background: var(--gradient-primary) !important;
-  box-shadow: 0 4px 20px rgba(255, 107, 139, 0.3);
-  border-bottom: 3px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(255, 107, 139, 0.3) !important;
+  border-bottom: 3px solid rgba(255, 255, 255, 0.2) !important;
 }
 
 body.version-kids .lesson-card {
-  border-radius: 20px;
-  border: none;
-  background: linear-gradient(135deg, #FFFFFF 0%, #FFF0F5 100%);
-  box-shadow: 
-    0 10px 30px rgba(255, 107, 139, 0.15),
-    0 4px 10px rgba(255, 107, 139, 0.1);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  overflow: hidden;
-  position: relative;
+  border-radius: 20px !important;
+  border: none !important;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF0F5 100%) !important;
+  box-shadow: 0 10px 30px rgba(255, 107, 139, 0.15), 0 4px 10px rgba(255, 107, 139, 0.1) !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  overflow: hidden !important;
+  position: relative !important;
 }
 
 body.version-kids .lesson-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--gradient-primary);
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  background: var(--gradient-primary) !important;
 }
 
 body.version-kids .lesson-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 
-    0 20px 40px rgba(255, 107, 139, 0.25),
-    0 8px 20px rgba(255, 107, 139, 0.15);
+  transform: translateY(-8px) scale(1.02) !important;
+  box-shadow: 0 20px 40px rgba(255, 107, 139, 0.25), 0 8px 20px rgba(255, 107, 139, 0.15) !important;
 }
 
 body.version-kids .card-header {
   background: var(--gradient-primary) !important;
-  border: none;
+  border: none !important;
   border-radius: 0 !important;
 }
 
 body.version-kids .card-header h2 {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 body.version-kids .btn-primary {
-  background: var(--gradient-primary);
-  border: none;
-  border-radius: 25px;
-  font-weight: bold;
-  box-shadow: 0 6px 15px rgba(255, 107, 139, 0.3);
-  transition: all 0.3s ease;
-  padding: 12px 25px;
+  background: var(--gradient-primary) !important;
+  border: none !important;
+  border-radius: 25px !important;
+  font-weight: bold !important;
+  box-shadow: 0 6px 15px rgba(255, 107, 139, 0.3) !important;
+  transition: all 0.3s ease !important;
+  padding: 12px 25px !important;
 }
 
 body.version-kids .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 107, 139, 0.4);
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(255, 107, 139, 0.4) !important;
 }
 
 body.version-kids .progress-bar {
-  background: var(--gradient-primary);
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(255, 107, 139, 0.2);
+  background: var(--gradient-primary) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 8px rgba(255, 107, 139, 0.2) !important;
 }
 
 body.version-kids .badge {
-  border-radius: 20px;
-  font-weight: bold;
-  background: var(--gradient-secondary);
-  border: none;
+  border-radius: 20px !important;
+  font-weight: bold !important;
+  background: var(--gradient-secondary) !important;
+  border: none !important;
 }
 
 body.version-kids .breadcrumb {
-  background: linear-gradient(135deg, #F8F9FF 0%, #FFFFFF 100%);
-  border-radius: 15px;
-  padding: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, #F8F9FF 0%, #FFFFFF 100%) !important;
+  border-radius: 15px !important;
+  padding: 15px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
 }
 
 body.version-kids .breadcrumb-item.active {
-  color: var(--color-primary);
-  font-weight: bold;
+  color: var(--color-primary) !important;
+  font-weight: bold !important;
 }
 
 body.version-kids .card {
-  border: none;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FF 100%);
-}
-
-/* Animaciones para niños */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
-}
-
-body.version-kids .lesson-card {
-  animation: float 3s ease-in-out infinite;
-}
-
-body.version-kids .lesson-card:nth-child(odd) {
-  animation-delay: 0.5s;
-}
-
-body.version-kids .lesson-card:nth-child(even) {
-  animation-delay: 1s;
+  border: none !important;
+  border-radius: 20px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FF 100%) !important;
 }
 
 /* ===== ESTILOS MINIMALISTAS PARA ADULTOS ===== */
 body.version-adults {
-  /* Paleta de colores sobrios y profesionales */
-  --color-primary: #2C3E50;
-  --color-primary-dark: #1A252F;
-  --color-secondary: #34495E;
-  --color-accent: #7F8C8D;
-  --color-success: #27AE60;
-  --color-warning: #F39C12;
-  --color-light: #ECF0F1;
-  background: #FAFAFA;
+  --color-primary: #2C3E50 !important;
+  --color-primary-dark: #1A252F !important;
+  --color-secondary: #34495E !important;
+  --color-accent: #7F8C8D !important;
+  --color-success: #27AE60 !important;
+  --color-warning: #F39C12 !important;
+  --color-light: #ECF0F1 !important;
+  background: #FAFAFA !important;
 }
 
 body.version-adults .navbar {
   background: var(--color-primary) !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  border: none !important;
 }
 
 body.version-adults .lesson-card {
-  border-radius: 8px;
-  border: 1px solid #EAEAEA;
-  background: #FFFFFF;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+  border-radius: 8px !important;
+  border: 1px solid #EAEAEA !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s ease !important;
 }
 
 body.version-adults .lesson-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-color: #DDD;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border-color: #DDD !important;
 }
 
 body.version-adults .card-header {
   background: var(--color-primary) !important;
-  border: none;
+  border: none !important;
   border-radius: 8px 8px 0 0 !important;
 }
 
 body.version-adults .btn-primary {
-  background: var(--color-primary);
-  border: 1px solid var(--color-primary-dark);
-  border-radius: 4px;
-  font-weight: normal;
-  box-shadow: none;
-  padding: 8px 20px;
-  transition: all 0.2s ease;
+  background: var(--color-primary) !important;
+  border: 1px solid var(--color-primary-dark) !important;
+  border-radius: 4px !important;
+  font-weight: normal !important;
+  box-shadow: none !important;
+  padding: 8px 20px !important;
+  transition: all 0.2s ease !important;
 }
 
 body.version-adults .btn-primary:hover {
-  background: var(--color-primary-dark);
-  transform: none;
-  box-shadow: none;
+  background: var(--color-primary-dark) !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 body.version-adults .progress-bar {
-  background: var(--color-primary);
-  border-radius: 2px;
+  background: var(--color-primary) !important;
+  border-radius: 2px !important;
 }
 
 body.version-adults .badge {
-  border-radius: 4px;
-  font-weight: normal;
-  background: #ECF0F1;
-  color: #2C3E50;
-  border: 1px solid #DDD;
+  border-radius: 4px !important;
+  font-weight: normal !important;
+  background: #ECF0F1 !important;
+  color: #2C3E50 !important;
+  border: 1px solid #DDD !important;
 }
 
 body.version-adults .breadcrumb {
-  background: #FFFFFF;
-  border-radius: 4px;
-  padding: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid #EEE;
+  background: #FFFFFF !important;
+  border-radius: 4px !important;
+  padding: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #EEE !important;
 }
 
 body.version-adults .breadcrumb-item.active {
-  color: #7F8C8D;
-  font-weight: normal;
+  color: #7F8C8D !important;
+  font-weight: normal !important;
 }
 
 body.version-adults .card {
-  border: 1px solid #EAEAEA;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-  background: #FFFFFF;
+  border: 1px solid #EAEAEA !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+  background: #FFFFFF !important;
 }
 
 body.version-adults .text-muted {
@@ -280,211 +252,171 @@ body.version-adults .text-muted {
 }
 
 body.version-adults .lead {
-  color: #2C3E50;
-  font-weight: 300;
+  color: #2C3E50 !important;
+  font-weight: 300 !important;
+}
+
+/* ===== ESTILOS DE DEBUG - MUY VISIBLES ===== */
+body::after {
+    content: "✅ CSS CARGADO - Versión: " attr(class) !important;
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+    color: white !important;
+    padding: 15px 20px !important;
+    border-radius: 10px !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    z-index: 9999 !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
+    border: 2px solid white !important;
+}
+
+/* Borde de confirmación */
+body {
+    border: 3px solid #4CAF50 !important;
+    animation: borderPulse 2s infinite !important;
+}
+
+@keyframes borderPulse {
+    0%, 100% { border-color: #4CAF50 !important; }
+    50% { border-color: #FF6B8B !important; }
 }
 
 /* ===== ESTILOS GENERALES ===== */
 .notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px;
-    border-radius: 5px;
-    color: white;
-    z-index: 1000;
-    transform: translateX(200%);
-    animation: slideIn 0.3s forwards;
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    padding: 15px !important;
+    border-radius: 5px !important;
+    color: white !important;
+    z-index: 1000 !important;
+    transform: translateX(200%) !important;
+    animation: slideIn 0.3s forwards !important;
 }
 
-.notification-success { background-color: #28a745; }
-.notification-error { background-color: #dc3545; }
-.notification-warning { background-color: #ffc107; color: #212529; }
-.notification-info { background-color: #17a2b8; }
+.notification-success { background-color: #28a745 !important; }
+.notification-error { background-color: #dc3545 !important; }
+.notification-warning { background-color: #ffc107 !important; color: #212529 !important; }
+.notification-info { background-color: #17a2b8 !important; }
 
-.notification i { margin-right: 10px; }
+.notification i { margin-right: 10px !important; }
 
 .fade-out {
-    animation: fadeOut 0.3s forwards;
+    animation: fadeOut 0.3s forwards !important;
 }
 
 @keyframes slideIn {
-    to { transform: translateX(0); }
+    to { transform: translateX(0) !important; }
 }
 
 @keyframes fadeOut {
-    to { opacity: 0; }
+    to { opacity: 0 !important; }
 }
 
 .loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0,0,0,0.5) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 9999 !important;
 }
 
 .card-img-container {
-    position: relative;
-    overflow: hidden;
-    background: var(--color-light);
+    position: relative !important;
+    overflow: hidden !important;
+    background: var(--color-light) !important;
 }
 
 .card-img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transition: transform 0.5s ease !important;
 }
 
 .lesson-card:hover .card-img-container img {
-    transform: scale(1.05);
+    transform: scale(1.05) !important;
 }
 
 .video-play-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.5rem;
-    color: white;
-    opacity: 0.9;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    transition: all 0.3s;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    font-size: 2.5rem !important;
+    color: white !important;
+    opacity: 0.9 !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+    transition: all 0.3s !important;
 }
 
 .lesson-card:hover .video-play-icon {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1 !important;
+    transform: translate(-50%, -50%) scale(1.1) !important;
 }
 
 .lesson-row {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    margin-left: -5px;
-    margin-right: -5px;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    padding-bottom: 10px !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    margin-left: -5px !important;
+    margin-right: -5px !important;
 }
 
 .lesson-row::-webkit-scrollbar {
-    display: none;
+    display: none !important;
 }
 
 .lesson-col {
-    flex: 0 0 auto;
-    padding-left: 5px;
-    padding-right: 5px;
+    flex: 0 0 auto !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
 }
 
 .slider-controls {
-    display: none;
+    display: none !important;
 }
 
 /* Responsive */
 @media (max-width: 575.98px) {
     .lesson-col {
-        width: 85%;
+        width: 85% !important;
     }
 
     .card-img-container {
-        height: 120px;
+        height: 120px !important;
     }
 
     .card-title {
-        font-size: 0.9rem;
+        font-size: 0.9rem !important;
     }
 
     .progress-text {
-        font-size: 0.7rem;
+        font-size: 0.7rem !important;
     }
     
     body.version-kids .btn-primary {
-        padding: 10px 20px;
-        font-size: 0.9rem;
+        padding: 10px 20px !important;
+        font-size: 0.9rem !important;
     }
     
-    /* Selector de versión responsive */
     .version-selector {
-        margin-bottom: 10px;
+        margin-bottom: 10px !important;
     }
     
     .navbar-text.me-3 {
         margin-right: 0.5rem !important;
-    }
-}
-
-@media (min-width: 576px) and (max-width: 991.98px) {
-    .lesson-col {
-        width: 45%;
-    }
-
-    .card-img-container {
-        height: 140px;
-    }
-
-    .card-title {
-        font-size: 1rem;
-    }
-}
-
-@media (min-width: 992px) {
-    .lesson-col {
-        width: 30%;
-    }
-
-    .card-img-container {
-        height: 160px;
-    }
-
-    .slider-controls {
-        display: flex;
-    }
-}
-
-@media (min-width: 1200px) {
-    .lesson-col {
-        width: 23%;
-    }
-
-    .card-img-container {
-        height: 180px;
-    }
-}
-
-@media (max-width: 767.98px) {
-    .card-text {
-        display: none;
-    }
-
-    .card-body {
-        padding: 0.75rem;
-    }
-
-    .card-footer {
-        padding: 0.5rem;
-    }
-
-    .badge, .btn {
-        font-size: 0.7rem;
-        padding: 0.25rem 0.5rem;
-    }
-}
-
-.category-section {
-    margin-bottom: 2rem;
-}
-
-@media (max-width: 767.98px) {
-    .category-section {
-        margin-bottom: 1.5rem;
     }
 }
 
@@ -495,54 +427,4 @@ body.version-adults .video-container {
 
 body.version-adults .content-block:has(.video-container) {
   display: none !important;
-}
-
-/* Animaciones modernas para niños */
-@keyframes pulse-glow {
-  0% { box-shadow: 0 0 0 rgba(255, 107, 139, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(255, 107, 139, 0.8); }
-  100% { box-shadow: 0 0 0 rgba(255, 107, 139, 0.4); }
-}
-
-@keyframes slide-in-right {
-  from { transform: translateX(30px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-body.version-kids .navbar-brand {
-  animation: slide-in-right 0.6s ease-out;
-}
-
-body.version-kids .btn-primary {
-  animation: pulse-glow 2s infinite;
-}
-
-/* Efectos de hover modernos */
-body.version-kids .lesson-card:hover::before {
-  background: linear-gradient(135deg, #FF6B8B 0%, #4ECDC4 50%, #FFE66D 100%);
-  transition: background 0.5s ease;
-}
-
-/* DEBUG: Indicador visual de que los estilos están cargando */
-body::before {
-    content: "VERSIÓN: " attr(class);
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    background: #333;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 3px;
-    font-size: 12px;
-    z-index: 9999;
-    font-family: monospace;
-}
-
-/* DEBUG: Forzar colores temporalmente */
-body.version-kids .navbar {
-    background: linear-gradient(135deg, #FF6B8B 0%, #FF8E6B 100%) !important;
-}
-
-body.version-adults .navbar {
-    background: #2C3E50 !important;
 }
