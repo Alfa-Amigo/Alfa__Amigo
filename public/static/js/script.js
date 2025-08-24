@@ -135,12 +135,50 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ======================
+    // ANIMACIONES PARA NIÑOS
+    // ======================
+    function setupKidsAnimations() {
+        if (document.body.classList.contains('version-kids')) {
+            // Animación de rebote en las tarjetas
+            document.querySelectorAll('.lesson-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 300);
+                });
+            });
+            
+            // Efectos de confeti al completar lección (simulado)
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 300);
+                });
+            });
+
+            // Agregar animaciones a los badges
+            document.querySelectorAll('.badge').forEach(badge => {
+                badge.addEventListener('mouseover', function() {
+                    this.style.transform = 'scale(1.1)';
+                });
+                badge.addEventListener('mouseout', function() {
+                    this.style.transform = '';
+                });
+            });
+        }
+    }
+
+    // ======================
     // INICIALIZACIÓN
     // ======================
     initSliders();
     setupHoverEffects();
     lazyLoadImages();
     setupQuizHandlers();
+    setupKidsAnimations();
 
     // Re-iniciar sliders al redimensionar
     window.addEventListener('resize', initSliders);
