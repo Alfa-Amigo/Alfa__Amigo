@@ -7,9 +7,10 @@
     <meta name="description" content="AlfaAmigo - Aplicación de alfabetización para adultos">
     <title>AlfaAmigo - {% block title %}{% endblock %}</title>
 
-    <!-- PRIMERO nuestro CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style-neon.css') }}?v=20.0">
-    <!-- DESPUÉS Bootstrap -->
+    <!-- CSS NEON elegante -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style-neon.css') }}?v=2.0">
+    
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.core.min.css">
@@ -17,38 +18,6 @@
 
     <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
-
-    <!-- Estilos INLINE de emergencia -->
-    <style>
-        /* FORZAR estilos de la navbar */
-        .navbar {
-            background: linear-gradient(135deg, #ff00ff 0%, #00ffff 50%, #ff0080 100%) !important;
-            box-shadow: 0 0 30px #ff00ff, 0 0 50px #00ffff !important;
-            border-bottom: 3px solid #00ffff !important;
-            animation: navbarGlow 2s infinite alternate !important;
-        }
-        
-        /* Indicador de que los estilos funcionan */
-        body::before {
-            content: "🔥 ESTILOS FUNCIONANDO - {{ version }}" !important;
-            position: fixed !important;
-            top: 10px !important;
-            left: 10px !important;
-            background: linear-gradient(135deg, #ff00ff, #00ffff) !important;
-            color: black !important;
-            padding: 10px 15px !important;
-            border-radius: 5px !important;
-            font-weight: bold !important;
-            z-index: 9999 !important;
-            border: 2px solid white !important;
-            text-shadow: 0 0 5px white !important;
-        }
-        
-        @keyframes navbarGlow {
-            0% { box-shadow: 0 0 30px #ff00ff, 0 0 50px #00ffff; }
-            100% { box-shadow: 0 0 50px #ff00ff, 0 0 70px #00ffff, 0 0 90px #ff0080; }
-        }
-    </style>
 </head>
 <body class="version-{{ version }}">
 <nav class="navbar navbar-expand-lg navbar-dark">
@@ -76,10 +45,10 @@
         <div class="d-flex align-items-center">
             {% if user %}
                 <span class="navbar-text me-3">
-                    <i class="fas fa-fire text-warning"></i> Racha: {{ user.streak }} días
+                    <i class="fas fa-fire"></i> Racha: {{ user.streak }} días
                 </span>
                 <span class="navbar-text me-3">
-                    <i class="fas fa-star text-warning"></i> {{ user.xp }} XP
+                    <i class="fas fa-star"></i> {{ user.xp }} XP
                 </span>
                 <a href="{{ url_for('profile') }}" class="btn btn-outline-light me-2">
                     <i class="fas fa-user"></i>
@@ -119,46 +88,5 @@
     <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
     <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-
-    <!-- Script de verificación -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ Página cargada - Versión:', '{{ version }}');
-            
-            // Verificación EXTREMA de estilos
-            setTimeout(function() {
-                // Cambiar colores con JavaScript para confirmar
-                document.body.style.border = '5px solid #ff00ff';
-                document.body.style.animation = 'pulse 2s infinite';
-                
-                // Crear elemento de confirmación
-                const confirmDiv = document.createElement('div');
-                confirmDiv.innerHTML = '🎉 ¡ESTILOS ACTIVOS! 🎉';
-                confirmDiv.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: linear-gradient(135deg, #ff00ff, #00ffff);
-                    color: black;
-                    padding: 20px;
-                    border-radius: 10px;
-                    font-size: 24px;
-                    font-weight: bold;
-                    z-index: 9999;
-                    box-shadow: 0 0 50px #ff00ff;
-                    border: 3px solid white;
-                `;
-                document.body.appendChild(confirmDiv);
-                
-                // Remover después de 3 segundos
-                setTimeout(() => {
-                    confirmDiv.remove();
-                    document.body.style.border = 'none';
-                }, 3000);
-                
-            }, 1000);
-        });
-    </script>
 </body>
 </html>
