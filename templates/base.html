@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -21,12 +22,29 @@
     <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
 </head>
-<body>
+<body class="version-{{ version }}">
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-     <a class="navbar-brand" href="{{ url_for('index') }}">
+        <a class="navbar-brand" href="{{ url_for('index') }}">
             <i class="fas fa-book-open me-2"></i>AlfaAmigo
         </a>
+        
+        <!-- Selector de versión -->
+        {% if user %}
+        <div class="navbar-text me-3">
+            <div class="btn-group btn-group-sm">
+                <a href="{{ url_for('set_version', version='kids') }}" 
+                   class="btn {% if version == 'kids' %}btn-warning{% else %}btn-outline-light{% endif %}">
+                    <i class="fas fa-child me-1"></i> Niños
+                </a>
+                <a href="{{ url_for('set_version', version='adults') }}" 
+                   class="btn {% if version == 'adults' %}btn-info{% else %}btn-outline-light{% endif %}">
+                    <i class="fas fa-user me-1"></i> Adultos
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        
         <div class="d-flex align-items-center">
             {% if user %}
                 <span class="navbar-text me-3">
@@ -41,8 +59,6 @@
                 <a href="{{ url_for('logout') }}" class="btn btn-outline-light">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
-
-            
             {% else %}
                 <a href="{{ url_for('register') }}" class="btn btn-outline-light me-2">
                     <i class="fas fa-user-plus"></i> Registrarse
@@ -97,4 +113,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
