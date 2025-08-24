@@ -6,6 +6,7 @@ class UIEffects {
         this.setupCardHover();
         this.setupPageTransitions();
         this.setupProgressAnimations();
+        this.setupVersionSpecificEffects();
     }
 
     static setupCardHover() {
@@ -63,6 +64,32 @@ class UIEffects {
         document.querySelectorAll('.progress-container').forEach(el => {
             observer.observe(el);
         });
+    }
+
+    static setupVersionSpecificEffects() {
+        // Efectos especiales para la versión niños
+        if (document.body.classList.contains('version-kids')) {
+            // Animación de entrada para elementos
+            document.querySelectorAll('.lesson-card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Efecto de pulso en botones importantes
+            setInterval(() => {
+                document.querySelectorAll('.btn-primary').forEach(btn => {
+                    btn.classList.add('animate__pulse');
+                    setTimeout(() => {
+                        btn.classList.remove('animate__pulse');
+                    }, 1000);
+                });
+            }, 5000);
+        }
     }
 }
 
