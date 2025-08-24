@@ -30,21 +30,22 @@
         </a>
         
         <!-- Selector de versión -->
-        {% if user %}
-        <div class="navbar-text me-3">
-            <div class="btn-group btn-group-sm">
-                <a href="{{ url_for('set_version', version='kids') }}" 
-                   class="btn {% if version == 'kids' %}btn-warning{% else %}btn-outline-light{% endif %}">
-                    <i class="fas fa-child me-1"></i> Niños
-                </a>
-                <a href="{{ url_for('set_version', version='adults') }}" 
-                   class="btn {% if version == 'adults' %}btn-info{% else %}btn-outline-light{% endif %}">
-                    <i class="fas fa-user me-1"></i> Adultos
-                </a>
-            </div>
-        </div>
-        {% endif %}
-        
+
+        <!-- Selector de versión -->
+{% if user %}
+<div class="navbar-text me-3">
+    <div class="btn-group btn-group-sm version-selector">
+        <a href="{{ url_for('set_version', version='kids') }}" 
+           class="btn {% if version == 'kids' %}btn-kids-active{% else %}btn-kids{% endif %}">
+            <i class="fas fa-child me-1"></i> Niños
+        </a>
+        <a href="{{ url_for('set_version', version='adults') }}" 
+           class="btn {% if version == 'adults' %}btn-adults-active{% else %}btn-adults{% endif %}">
+            <i class="fas fa-user me-1"></i> Adultos
+        </a>
+    </div>
+</div>
+{% endif %}
         <div class="d-flex align-items-center">
             {% if user %}
                 <span class="navbar-text me-3">
