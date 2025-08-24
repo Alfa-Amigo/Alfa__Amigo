@@ -1,119 +1,245 @@
-/* ===== ESTILOS NEON EXTREMOS ===== */
+/* ===== ESTILOS NEON ELEGANTES PARA NIÑOS ===== */
 body.version-kids {
-    background: linear-gradient(135deg, #000000 0%, #220033 50%, #000000 100%) !important;
-    min-height: 100vh !important;
-    color: #ffffff !important;
-    font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif !important;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%) !important;
+    min-height: 100vh;
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* NAVBAR NEON BRUTAL */
 body.version-kids .navbar {
-    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 50%, #ff0080 100%) !important;
-    box-shadow: 0 0 50px #ff00ff, 0 0 80px #00ffff !important;
-    border-bottom: 4px solid #00ffff !important;
-    animation: neonNavbar 1.5s infinite alternate !important;
+    background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%) !important;
+    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+    border-bottom: 2px solid #4ecdc4;
 }
 
-@keyframes neonNavbar {
-    0% { 
-        box-shadow: 0 0 50px #ff00ff, 0 0 80px #00ffff; 
-        background: linear-gradient(135deg, #ff00ff 0%, #00ffff 50%, #ff0080 100%) !important;
-    }
-    100% { 
-        box-shadow: 0 0 70px #ff00ff, 0 0 100px #00ffff, 0 0 120px #ff0080; 
-        background: linear-gradient(135deg, #00ffff 0%, #ff0080 50%, #ff00ff 100%) !important;
-    }
+body.version-kids .navbar-brand {
+    color: #ffffff !important;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-/* BOTONES SELECTOR NEON */
+body.version-kids .navbar-text {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+body.version-kids .lesson-card {
+    border-radius: 20px;
+    border: 2px solid #ff6b6b;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3);
+    transition: all 0.3s ease;
+}
+
+body.version-kids .lesson-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(255, 107, 107, 0.5);
+    border-color: #4ecdc4;
+}
+
+body.version-kids .card-header {
+    background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%) !important;
+    border: none;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+body.version-kids .btn-primary {
+    background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%) !important;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    transition: all 0.3s ease;
+}
+
+body.version-kids .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+body.version-kids .progress-bar {
+    background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+    border-radius: 10px;
+}
+
+body.version-kids .badge {
+    border-radius: 15px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #4ecdc4 0%, #ff6b6b 100%);
+    border: none;
+    color: #ffffff;
+}
+
+/* ===== SELECTOR DE VERSIÓN ELEGANTE ===== */
+.version-selector .btn {
+    border: 2px solid transparent;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 20px;
+}
+
 .version-selector .btn-kids {
-    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%) !important;
-    color: #000000 !important;
-    border: 3px solid #00ffff !important;
-    box-shadow: 0 0 20px #ff00ff, 0 0 30px #00ffff !important;
-    font-weight: 900 !important;
-    text-shadow: 0 0 10px #ffffff !important;
-    animation: buttonPulse 2s infinite !important;
+    background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+    color: #ffffff;
+    border-color: #4ecdc4;
+}
+
+.version-selector .btn-kids:hover {
+    background: linear-gradient(135deg, #ff5252 0%, #26a69a 100%);
+    transform: translateY(-2px);
 }
 
 .version-selector .btn-kids-active {
-    background: linear-gradient(135deg, #ff0080 0%, #ff00ff 100%) !important;
-    color: #ffffff !important;
-    border: 3px solid #ffffff !important;
-    box-shadow: 0 0 30px #ff00ff, 0 0 50px #ff0080 !important;
-    animation: activeButtonPulse 1s infinite !important;
+    background: linear-gradient(135deg, #ff5252 0%, #26a69a 100%);
+    color: #ffffff;
+    border-color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
 }
 
-@keyframes buttonPulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 20px #ff00ff, 0 0 30px #00ffff; }
-    50% { transform: scale(1.05); box-shadow: 0 0 30px #ff00ff, 0 0 40px #00ffff; }
+.version-selector .btn-adults {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: #ecf0f1;
+    border-color: #7f8c8d;
 }
 
-@keyframes activeButtonPulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 30px #ff00ff, 0 0 50px #ff0080; }
-    50% { transform: scale(1.1); box-shadow: 0 0 40px #ff00ff, 0 0 60px #ff0080; }
+.version-selector .btn-adults:hover {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    transform: translateY(-2px);
 }
 
-/* TEXTO NEON */
-body.version-kids .navbar-brand {
-    color: #000000 !important;
-    font-weight: 900 !important;
-    text-shadow: 0 0 10px #ffffff, 0 0 20px #ff00ff, 0 0 30px #00ffff !important;
-    font-size: 2rem !important;
-    animation: textGlow 2s infinite alternate !important;
+.version-selector .btn-adults-active {
+    background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%);
+    color: #ffffff;
+    border-color: #ecf0f1;
+    box-shadow: 0 0 15px rgba(44, 62, 80, 0.3);
 }
 
-@keyframes textGlow {
-    0% { text-shadow: 0 0 10px #ffffff, 0 0 20px #ff00ff, 0 0 30px #00ffff; }
-    100% { text-shadow: 0 0 15px #ffffff, 0 0 30px #ff00ff, 0 0 45px #00ffff; }
+/* ===== ESTILOS MINIMALISTAS PARA ADULTOS ===== */
+body.version-adults {
+    background: #f8f9fa;
+    min-height: 100vh;
+    color: #2c3e50;
+    font-family: 'Inter', sans-serif;
 }
 
-/* ===== ESTILOS ADULTOS MINIMALISTAS ===== */
 body.version-adults .navbar {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
-    border-bottom: 1px solid #444 !important;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #ecf0f1;
 }
 
 body.version-adults .navbar-brand {
-    color: #ffffff !important;
-    font-weight: 300 !important;
-    letter-spacing: 1px !important;
+    color: #ecf0f1;
+    font-weight: 400;
+    letter-spacing: 0.5px;
 }
 
-/* ===== DEBUG SUPER VISIBLE ===== */
-body::after {
-    content: "⚡ NEON ACTIVO - {{ version }}" !important;
-    position: fixed !important;
-    bottom: 20px !important;
-    right: 20px !important;
-    background: linear-gradient(135deg, #ff00ff, #00ffff) !important;
-    color: #000000 !important;
-    padding: 15px 20px !important;
-    border-radius: 10px !important;
-    font-size: 16px !important;
-    font-weight: 900 !important;
-    z-index: 9999 !important;
-    box-shadow: 0 0 30px #ff00ff !important;
-    border: 3px solid #ffffff !important;
-    text-shadow: 0 0 5px #ffffff !important;
-    animation: debugPulse 1s infinite alternate !important;
+body.version-adults .navbar-text {
+    color: #bdc3c7;
+    font-weight: 400;
 }
 
-@keyframes debugPulse {
-    0% { transform: scale(1); box-shadow: 0 0 30px #ff00ff; }
-    100% { transform: scale(1.05); box-shadow: 0 0 40px #ff00ff, 0 0 50px #00ffff; }
+body.version-adults .lesson-card {
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
 }
 
-/* BORDE DE CONFIRMACIÓN */
-body {
-    border: 5px solid #ff00ff !important;
-    animation: borderFlash 2s infinite !important;
+body.version-adults .lesson-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-color: #bdc3c7;
 }
 
-@keyframes borderFlash {
-    0%, 100% { border-color: #ff00ff; }
-    25% { border-color: #00ffff; }
-    50% { border-color: #ff0080; }
-    75% { border-color: #ffff00; }
+body.version-adults .card-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border: none;
+    color: #ecf0f1;
+    font-weight: 400;
+}
+
+body.version-adults .btn-primary {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border: 1px solid #2c3e50;
+    border-radius: 6px;
+    font-weight: 400;
+    color: #ecf0f1;
+    transition: all 0.2s ease;
+}
+
+body.version-adults .btn-primary:hover {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    transform: translateY(-1px);
+}
+
+body.version-adults .progress-bar {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border-radius: 4px;
+}
+
+body.version-adults .badge {
+    border-radius: 6px;
+    font-weight: 400;
+    background: #ecf0f1;
+    border: 1px solid #bdc3c7;
+    color: #2c3e50;
+}
+
+/* ===== ESTILOS GENERALES ===== */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    color: white;
+    z-index: 1000;
+    transform: translateX(200%);
+    animation: slideIn 0.3s forwards;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s forwards;
+}
+
+@keyframes slideIn {
+    to { transform: translateX(0); }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; }
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .version-selector {
+        margin: 10px 0;
+    }
+    
+    body.version-kids .btn-primary {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+/* ===== OCULTAR VIDEOS EN ADULTOS ===== */
+body.version-adults .video-container {
+    display: none !important;
 }
