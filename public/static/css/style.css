@@ -10,6 +10,53 @@
     --color-dark: #5a5c69;
 }
 
+/* ===== SELECTOR DE VERSIÓN ===== */
+.version-selector .btn {
+    border: 2px solid transparent;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+/* Botón Niños - Inactivo */
+.version-selector .btn-kids {
+    background: linear-gradient(135deg, #FFD166 0%, #FF9E66 100%);
+    color: #333;
+    border-color: #FF9E66;
+}
+
+.version-selector .btn-kids:hover {
+    background: linear-gradient(135deg, #FFB74D 0%, #FF8E50 100%);
+    transform: translateY(-2px);
+}
+
+/* Botón Niños - Activo */
+.version-selector .btn-kids-active {
+    background: linear-gradient(135deg, #FF6B8B 0%, #FF8E6B 100%);
+    color: white;
+    border-color: white;
+    box-shadow: 0 0 15px rgba(255, 107, 139, 0.5);
+}
+
+/* Botón Adultos - Inactivo */
+.version-selector .btn-adults {
+    background: linear-gradient(135deg, #90A4AE 0%, #78909C 100%);
+    color: white;
+    border-color: #78909C;
+}
+
+.version-selector .btn-adults:hover {
+    background: linear-gradient(135deg, #78909C 0%, #546E7A 100%);
+    transform: translateY(-2px);
+}
+
+/* Botón Adultos - Activo */
+.version-selector .btn-adults-active {
+    background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+    color: white;
+    border-color: white;
+    box-shadow: 0 0 15px rgba(44, 62, 80, 0.5);
+}
+
 /* ===== ESTILOS MODERNOS PARA NIÑOS ===== */
 body.version-kids {
   /* Paleta de colores vibrantes y modernos */
@@ -363,6 +410,15 @@ body.version-adults .lead {
         padding: 10px 20px;
         font-size: 0.9rem;
     }
+    
+    /* Selector de versión responsive */
+    .version-selector {
+        margin-bottom: 10px;
+    }
+    
+    .navbar-text.me-3 {
+        margin-right: 0.5rem !important;
+    }
 }
 
 @media (min-width: 576px) and (max-width: 991.98px) {
@@ -465,4 +521,28 @@ body.version-kids .btn-primary {
 body.version-kids .lesson-card:hover::before {
   background: linear-gradient(135deg, #FF6B8B 0%, #4ECDC4 50%, #FFE66D 100%);
   transition: background 0.5s ease;
+}
+
+/* DEBUG: Indicador visual de que los estilos están cargando */
+body::before {
+    content: "VERSIÓN: " attr(class);
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    z-index: 9999;
+    font-family: monospace;
+}
+
+/* DEBUG: Forzar colores temporalmente */
+body.version-kids .navbar {
+    background: linear-gradient(135deg, #FF6B8B 0%, #FF8E6B 100%) !important;
+}
+
+body.version-adults .navbar {
+    background: #2C3E50 !important;
 }
