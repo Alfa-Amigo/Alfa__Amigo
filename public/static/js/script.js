@@ -183,3 +183,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Re-iniciar sliders al redimensionar
     window.addEventListener('resize', initSliders);
 });
+// Al final del archivo script.js, agrega:
+function checkVersionStyles() {
+    console.log('Versión actual:', document.body.className);
+    console.log('Estilos aplicados:');
+    
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+        const styles = window.getComputedStyle(navbar);
+        console.log('Color navbar:', styles.backgroundColor);
+    }
+}
+
+// Ejecutar al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    checkVersionStyles();
+    
+    // También verificar cada 2 segundos (solo para debug)
+    setTimeout(checkVersionStyles, 2000);
+    setTimeout(checkVersionStyles, 5000);
+});
