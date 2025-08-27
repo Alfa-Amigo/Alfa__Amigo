@@ -193,6 +193,18 @@ def writing_practice():
         return redirect(url_for('login'))
     return render_template('writing_practice.html')
 
+
+@app.route('/writing_practice/<int:lesson_id>')
+def writing_practice(lesson_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    lesson = next((l for l in lessons if l.get('id') == lesson_id), None)
+    if not lesson:
+        return redirect(url_for('index'))
+    
+    return render_template('writing_practice.html', lesson=lesson)
+
 # Configuración para producción
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
