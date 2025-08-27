@@ -38,57 +38,7 @@ def load_lessons():
             "description": "Lección de ejemplo",
             "category": "General",
             "content": [{"type": "text", "content": "Contenido de ejemplo"}],
-            "quiz": [            if request.form.get(f'q{q.get("id")}') == q.get('correct_answer')
-        )
-        
-        if lesson_id not in session['user']['completed_lessons']:
-            session['user']['completed_lessons'].append(lesson_id)
-            session['user']['xp'] += score * 10
-            session.modified = True
-        
-        return render_template('quiz_result.html',
-                            lesson=lesson,
-                            score=score,
-                            total=len(lesson.get('quiz', [])))
-    
-    return render_template('quiz.html', lesson=lesson)
-
-@app.route('/profile')
-def profile():
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    return render_template('profile.html')
-
-@app.route('/logout')
-def logout():
-    session.pop('user', None)
-    session.pop('version', None)
-    return redirect(url_for('login'))
-
-# Ruta para práctica de escritura general
-@app.route('/writing_practice')
-def writing_practice_general():
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    return render_template('writing_practice.html')
-
-# Ruta para práctica de escritura específica de una lección
-@app.route('/writing_practice/<int:lesson_id>')
-def writing_practice_lesson(lesson_id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    
-    lesson = next((l for l in lessons if l.get('id') == lesson_id), None)
-    if not lesson:
-        return redirect(url_for('index'))
-    
-    return render_template('writing_practice.html', lesson=lesson)
-
-# Configuración para producción
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
-
-
+            "quiz": [
                 {
                     "id": 1,
                     "question": "Pregunta ejemplo",
@@ -111,8 +61,7 @@ def inject_global_data():
         'category_icons': {
             'Lectura': 'book-open',
             'Matemáticas': 'calculator',
-            'Escritura': 'pen-fancy',
-            'Vocabulario': 'font',
+            'Escritura': 'pen',
             'General': 'question-circle'
         },
         'lessons': lessons
@@ -124,7 +73,7 @@ def inject_global_data():
 def descargar_app():
     return send_from_directory(
         directory=os.path.join(app.root_path, 'public/static/downloads'),
-        path='Alfa Amigo.apk',
+        path='Alfa Amigo.apk',  # Cambia por el nombre real de tu APK
         as_attachment=True,
         mimetype='application/vnd.android.package-archive'
     )
@@ -237,25 +186,6 @@ def logout():
     session.pop('version', None)
     return redirect(url_for('login'))
 
-# Ruta para práctica de escritura general
-@app.route('/writing_practice')
-def writing_practice_general():
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    return render_template('writing_practice.html')
-
-# Ruta para práctica de escritura específica de una lección
-@app.route('/writing_practice/<int:lesson_id>')
-def writing_practice_lesson(lesson_id):
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    
-    lesson = next((l for l in lessons if l.get('id') == lesson_id), None)
-    if not lesson:
-        return redirect(url_for('index'))
-    
-    return render_template('writing_practice.html', lesson=lesson)
-
 # Configuración para producción
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080)
