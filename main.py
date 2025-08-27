@@ -61,7 +61,8 @@ def inject_global_data():
         'category_icons': {
             'Lectura': 'book-open',
             'Matemáticas': 'calculator',
-            'Escritura': 'pen',
+            'Escritura': 'pen-fancy',  # Icono actualizado para escritura
+            'Vocabulario': 'font',
             'General': 'question-circle'
         },
         'lessons': lessons
@@ -186,16 +187,16 @@ def logout():
     session.pop('version', None)
     return redirect(url_for('login'))
 
-
+# Ruta para práctica de escritura general
 @app.route('/writing_practice')
-def writing_practice():
+def writing_practice_general():
     if 'user' not in session:
         return redirect(url_for('login'))
     return render_template('writing_practice.html')
 
-
+# Ruta para práctica de escritura específica de una lección
 @app.route('/writing_practice/<int:lesson_id>')
-def writing_practice(lesson_id):
+def writing_practice_lesson(lesson_id):
     if 'user' not in session:
         return redirect(url_for('login'))
     
@@ -207,4 +208,4 @@ def writing_practice(lesson_id):
 
 # Configuración para producción
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080, debug=True)
