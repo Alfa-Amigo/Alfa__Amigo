@@ -186,6 +186,13 @@ def logout():
     session.pop('version', None)
     return redirect(url_for('login'))
 
+
+@app.route('/writing_practice')
+def writing_practice():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    return render_template('writing_practice.html')
+
 # Configuración para producción
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
