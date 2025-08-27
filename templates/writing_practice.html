@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lección de Escritura - AlfaAmigo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --color-primary: #4e73df;
+            --color-primary-dark: #224abe;
+            --color-success: #1cc88a;
+            --color-warning: #f6c23e;
+            --color-danger: #e74a3b;
+        }
+        
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .lesson-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .lesson-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #224abe 100%);
+            color: white;
+            padding: 20px;
+        }
+        
+        .lesson-body {
+            padding: 20px;
+        }
+        
+        .instruction-section {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .paint-container {
+            border: 1px solid #e3e6f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .paint-header {
+            background: #eaecf4;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .tools-panel {
+            display: flex;
+            padding: 10px;
+            background: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-tool {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: 2px solid #d1d3e2;
+            background: white;
+            color: #6e707e;
+            transition: all 0.2s;
+        }
+        
+        .btn-tool:hover, .btn-tool.active {
+            border-color: var(--color-primary);
+            background: var(--color-primary);
+            color: white;
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .color-option {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.2);
+        }
+        
+        .color-option.active {
+            border-color: #333;
+            transform: scale(1.2);
+        }
+        
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #fff;
+        }
+        
+        #paintCanvas {
+            background: white;
+            cursor: crosshair;
+            touch-action: none;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .guide-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            opacity: 0.2;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .word-guides {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9fc;
+            flex-wrap: wrap;
+        }
+        
+        .word-btn {
+            padding: 6px 12px;
+            border-radius: 18px;
+            border: 2px solid var(--color-primary);
+            background: white;
+            color: var(--color-primary);
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .word-btn:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+        
+        .brush-size {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        #brushSize {
+            width: 80px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .tools-panel {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tool-group {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .canvas-container {
+                height: 300px;
+            }
+        }
+
+        /* Estilos para modo niños */
+        body.version-kids .lesson-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+        }
+        
+        body.version-kids .btn-tool:hover, 
+        body.version-kids .btn-tool.active {
+            background: #ff6b6b;
+            border-color: #4ecdc4;
+        }
+        
+        body.version-kids .word-btn {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+        
+        body.version-kids .word-btn:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+    </style>
+</head>
+<body class="version-adults">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-book-open me-2"></i>AlfaAmigo
+            </a>
+            <div class="d-flex align-items-center">
+                <span class="navbar-text me-3">
+                    <i class="fas fa-star"></i> 150 XP
+                </span>
+                <a href="#" class="btn btn-outline-light">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="lesson-container">
+        <div class="lesson-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-pen-fancy me-2"></i> Práctica de Escritura</h2>
+                    <p class="mb-0">Aprende a escribir letras y palabras</p>
+                </div>
+                <span class="badge bg-light text-primary fs-6">Lectura y Escritura</span>
+            </div>
+        </div>
+        
+        <div class="lesson-body">
+            <div class="instruction-section">
+                <h4><i class="fas fa-info-circle me-2"></i> Instrucciones</h4>
+                <p class="mb-0">Usa las herramientas de abajo para practicar la escritura de letras y palabras. Selecciona una letra o palabra guía y traza sobre ella con el mouse o con tu dedo.</p>
+            </div>
+            
+            <h4 class="mb-3"><i class="fas fa-paint-brush me-2"></i> Practica de Escritura</h4>
+            
+            <div class="paint-container">
+                <div class="paint-header">
+                    <span class="fw-bold">Herramientas de escritura</span>
+                    <div>
+                        <button class="btn btn-sm btn-light me-2" id="toggleGuides">
+                            <i class="fas fa-layer-group"></i> Guías
+                        </button>
+                        <button class="btn btn-sm btn-light" id="clearAll">
+                            <i class="fas fa-broom"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="tools-panel">
+                    <div class="tool-group">
+                        <button class="btn-tool active" id="brushTool" title="Pincel">
+                            <i class="fas fa-paint-brush"></i>
+                        </button>
+                        <button class="btn-tool" id="eraserTool" title="Borrador">
+                            <i class="fas fa-eraser"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <div class="brush-size">
+                            <span>Tamaño:</span>
+                            <input type="range" id="brushSize" min="1" max="30" value="5">
+                        </div>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <div class="color-picker">
+                            <div class="color-option active" style="background-color: #000000;" data-color="#000000"></div>
+                            <div class="color-option" style="background-color: #e74a3b;" data-color="#e74a3b"></div>
+                            <div class="color-option" style="background-color: #4e73df;" data-color="#4e73df"></div>
+                            <div class="color-option" style="background-color: #1cc88a;" data-color="#1cc88a"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="canvas-container">
+                    <canvas id="paintCanvas"></canvas>
+                    <canvas id="guideOverlay" class="guide-overlay"></canvas>
+                </div>
+                
+                <div class="word-guides">
+                    <span class="fw-bold me-2">Practicar:</span>
+                    <button class="word-btn" data-word="A">Letra A</button>
+                    <button class="word-btn" data-word="B">Letra B</button>
+                    <button class="word-btn" data-word="C">Letra C</button>
+                    <button class="word-btn" data-word="M">Letra M</button>
+                    <button class="word-btn" data-word="Hola">Palabra: Hola</button>
+                    <button class="word-btn" data-word="Mama">Palabra: Mamá</button>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Guardar Práctica
+                </button>
+                <button class="btn btn-outline-primary">
+                    <i class="fas fa-share me-1"></i> Compartir
+                </button>
+                <a href="#" class="btn btn-success ms-auto">
+                    Siguiente Lección <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('paintCanvas');
+            const guideCanvas = document.getElementById('guideOverlay');
+            const ctx = canvas.getContext('2d');
+            const guideCtx = guideCanvas.getContext('2d');
+            const container = document.querySelector('.canvas-container');
+            
+            // Ajustar tamaño de los canvas al contenedor
+            function resizeCanvases() {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                
+                canvas.width = width;
+                canvas.height = height;
+                guideCanvas.width = width;
+                guideCanvas.height = height;
+                
+                // Redibujar guías si estaban activas
+                if (guidesVisible) {
+                    drawGuides(currentWord);
+                }
+            }
+            
+            // Variables de estado
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            let currentColor = '#000000';
+            let brushSize = 5;
+            let currentTool = 'brush';
+            let guidesVisible = true;
+            let currentWord = 'A';
+            
+            // Inicializar
+            resizeCanvases();
+            window.addEventListener('resize', resizeCanvases);
+            drawGuides(currentWord);
+            
+            // Funciones de dibujo
+            function startDrawing(e) {
+                isDrawing = true;
+                [lastX, lastY] = getPosition(e);
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                const [x, y] = getPosition(e);
+                
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+                ctx.lineWidth = brushSize;
+                ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : currentColor;
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                
+                [lastX, lastY] = [x, y];
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            function getPosition(e) {
+                let x, y;
+                const rect = canvas.getBoundingClientRect();
+                
+                if (e.type.includes('touch')) {
+                    x = e.touches[0].clientX - rect.left;
+                    y = e.touches[0].clientY - rect.top;
+                } else {
+                    x = e.clientX - rect.left;
+                    y = e.clientY - rect.top;
+                }
+                
+                return [x, y];
+            }
+            
+            // Dibujar guías de escritura
+            function drawGuides(word) {
+                guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+                
+                if (!guidesVisible) return;
+                
+                guideCtx.strokeStyle = '#4e73df';
+                guideCtx.lineWidth = 1;
+                guideCtx.setLineDash([5, 5]);
+                
+                // Líneas de base para escritura
+                const centerY = guideCanvas.height / 2;
+                guideCtx.beginPath();
+                guideCtx.moveTo(0, centerY);
+                guideCtx.lineTo(guideCanvas.width, centerY);
+                guideCtx.stroke();
+                
+                guideCtx.beginPath();
+                guideCtx.moveTo(0, centerY - 40);
+                guideCtx.lineTo(guideCanvas.width, centerY - 40);
+                guideCtx.stroke();
+                
+                guideCtx.beginPath();
+                guideCtx.moveTo(0, centerY + 40);
+                guideCtx.lineTo(guideCanvas.width, centerY + 40);
+                guideCtx.stroke();
+                
+                // Texto guía
+                guideCtx.fillStyle = 'rgba(78, 115, 223, 0.2)';
+                guideCtx.font = 'bold 120px Arial';
+                guideCtx.textAlign = 'center';
+                guideCtx.textBaseline = 'middle';
+                guideCtx.fillText(word, guideCanvas.width / 2, centerY);
+                
+                guideCtx.setLineDash([]);
+            }
+            
+            // Limpiar el canvas
+            function clearCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            // Event listeners para herramientas
+            document.getElementById('brushTool').addEventListener('click', function() {
+                currentTool = 'brush';
+                this.classList.add('active');
+                document.getElementById('eraserTool').classList.remove('active');
+            });
+            
+            document.getElementById('eraserTool').addEventListener('click', function() {
+                currentTool = 'eraser';
+                this.classList.add('active');
+                document.getElementById('brushTool').classList.remove('active');
+            });
+            
+            document.getElementById('clearAll').addEventListener('click', clearCanvas);
+            
+            // Event listeners para colores
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    currentColor = this.getAttribute('data-color');
+                });
+            });
+            
+            // Control de tamaño de pincel
+            document.getElementById('brushSize').addEventListener('input', function() {
+                brushSize = this.value;
+            });
+            
+            // Botones de palabras guía
+            document.querySelectorAll('.word-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    currentWord = this.getAttribute('data-word');
+                    drawGuides(currentWord);
+                });
+            });
+            
+            // Toggle guías
+            document.getElementById('toggleGuides').addEventListener('click', function() {
+                guidesVisible = !guidesVisible;
+                drawGuides(currentWord);
+                this.innerHTML = guidesVisible ? 
+                    '<i class="fas fa-layer-group"></i> Ocultar Guías' : 
+                    '<i class="fas fa-layer-group"></i> Mostrar Guías';
+            });
+            
+            // Event listeners para dibujar
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Soporte para dispositivos táctiles
+            canvas.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                startDrawing(e);
+            });
+            
+            canvas.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                draw(e);
+            });
+            
+            canvas.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                stopDrawing();
+            });
+        });
+    </script>
+</body>
+</html>
