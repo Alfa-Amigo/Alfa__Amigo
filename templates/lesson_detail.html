@@ -57,55 +57,11 @@
                     <div class="interactive-content p-3 bg-white rounded border">
                         <h5><i class="fas fa-hand-pointer me-2"></i>Practica</h5>
                         <p class="fs-4">{{ item.content }}</p>
-                        
-                        <!-- Añadir botón de práctica de escritura para lecciones interactivas -->
-                        {% if lesson.category == "Lectura" or lesson.category == "Escritura" %}
-                        <div class="text-center mt-3">
-                            <a href="{{ url_for('writing_practice', lesson_id=lesson.id) }}" class="btn btn-success">
-                                <i class="fas fa-paint-brush me-2"></i> Practicar Escritura
-                            </a>
-                        </div>
-                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
                 {% endfor %}
             </div>
-            
-            <!-- Sección de práctica de escritura para lecciones de lectura/escritura -->
-            {% if lesson.category == "Lectura" or lesson.category == "Escritura" %}
-            <div class="practice-section mt-5 p-4 bg-light rounded">
-                <h4><i class="fas fa-pen-fancy me-2"></i> Práctica de Escritura</h4>
-                <p>Refuerza lo aprendido practicando la escritura con nuestro pizarrón interactivo.</p>
-                
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-paint-brush fa-3x text-primary mb-3"></i>
-                                <h5>Pizarrón de Práctica</h5>
-                                <p>Practica la escritura de letras y palabras con herramientas fáciles de usar.</p>
-                                <a href="{{ url_for('writing_practice', lesson_id=lesson.id) }}" class="btn btn-primary mt-2">
-                                    <i class="fas fa-paint-brush me-2"></i> Abrir Pizarrón
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-download fa-3x text-success mb-3"></i>
-                                <h5>Ejercicios para Imprimir</h5>
-                                <p>Descarga ejercicios de caligrafía para practicar fuera de línea.</p>
-                                <button class="btn btn-success mt-2" onclick="generatePrintable()">
-                                    <i class="fas fa-download me-2"></i> Descargar PDF
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
         </div>
     </div>
 
@@ -113,73 +69,6 @@
         <a href="{{ url_for('quiz', lesson_id=lesson.id) }}" class="btn btn-primary btn-lg">
             <i class="fas fa-play me-2"></i> Realizar cuestionario
         </a>
-        
-        <!-- Botón adicional de práctica para lecciones de escritura -->
-        {% if lesson.category == "Lectura" or lesson.category == "Escritura" %}
-        <a href="{{ url_for('writing_practice', lesson_id=lesson.id) }}" class="btn btn-success btn-lg ms-2">
-            <i class="fas fa-paint-brush me-2"></i> Practicar Escritura
-        </a>
-        {% endif %}
     </div>
 </div>
-
-<!-- Modal para descarga de PDF -->
-<div class="modal fade" id="printableModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ejercicios de Escritura</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Selecciona el tipo de ejercicio que deseas descargar:</p>
-                <div class="d-grid gap-2">
-                    <button class="btn btn-outline-primary" onclick="downloadPrintable('lines')">
-                        <i class="fas fa-border-style me-2"></i> Líneas de práctica
-                    </button>
-                    <button class="btn btn-outline-primary" onclick="downloadPrintable('letters')">
-                        <i class="fas fa-font me-2"></i> Letras del alfabeto
-                    </button>
-                    <button class="btn btn-outline-primary" onclick="downloadPrintable('words')">
-                        <i class="fas fa-pencil-alt me-2"></i> Palabras completas
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function generatePrintable() {
-        // Mostrar modal de selección
-        var modal = new bootstrap.Modal(document.getElementById('printableModal'));
-        modal.show();
-    }
-    
-    function downloadPrintable(type) {
-        // Simular descarga (en una implementación real, conectarías con el backend)
-        alert('Función de descarga para ' + type + ' en desarrollo. En una implementación real, esto generaría un PDF personalizado.');
-        
-        // Cerrar el modal
-        var modal = bootstrap.Modal.getInstance(document.getElementById('printableModal'));
-        modal.hide();
-    }
-</script>
-
-<style>
-    .practice-section {
-        border-left: 4px solid #4e73df;
-    }
-    
-    @media (max-width: 768px) {
-        .btn-lg {
-            margin-top: 10px;
-            width: 100%;
-        }
-        
-        .ms-2 {
-            margin-left: 0 !important;
-        }
-    }
-</style>
 {% endblock %}
