@@ -23,8 +23,8 @@
             },
             {
                 "type": "interactive",
-                "content": "Practica pronunciando: A (a), B (be), C (ce), D (de)",
-                "hint": "Escucha el video primero"
+                "content": "Practica escribiendo las letras en nuestro pizarrón digital",
+                "hint": "Comienza con la A y avanza en orden"
             }
         ],
         "quiz": [
@@ -61,8 +61,8 @@
             },
             {
                 "type": "interactive",
-                "content": "Pronuncia: A (casa), E (mesa), I (libro), O (oso), U (luna)",
-                "hint": "Repite después del video"
+                "content": "Practica escribiendo las vocales: A, E, I, O, U",
+                "hint": "Repite cada vocal varias veces"
             }
         ],
         "quiz": [
@@ -381,6 +381,160 @@
                 "question": "¿Qué fruta es roja y tiene semillas afuera?",
                 "options": ["naranja", "manzana", "fresa", "sandía"],
                 "correct_answer": "fresa"
+            }
+        ]
+    },
+    {
+        "id": 11,
+        "title": "Primeros Trazos",
+        "description": "Aprende a hacer los trazos básicos de escritura",
+        "icon": "pen-fancy",
+        "category": "Escritura",
+        "content": [
+            {
+                "type": "text",
+                "content": "Los trazos básicos son el fundamento de la escritura. Practica líneas rectas, curvas y círculos."
+            },
+            {
+                "type": "image",
+                "url": "/static/images/lessons/trazos-basicos.jpg",
+                "alt": "Trazos básicos de escritura",
+                "description": "Imagen que muestra los trazos básicos: líneas, curvas y círculos"
+            },
+            {
+                "type": "interactive",
+                "content": "Practica los trazos en nuestro pizarrón digital",
+                "hint": "Comienza con líneas rectas y luego avanza a curvas"
+            }
+        ],
+        "quiz": [
+            {
+                "id": 1,
+                "question": "¿Cuál de estos es un trazo básico?",
+                "options": ["Línea recta", "Cuadrado", "Triángulo", "Estrella"],
+                "correct_answer": "Línea recta"
+            }
+        ]
+    },
+    {
+        "id": 12,
+        "title": "Letras Mayúsculas",
+        "description": "Aprende a escribir las letras mayúsculas",
+        "icon": "font",
+        "category": "Escritura",
+        "content": [
+            {
+                "type": "text",
+                "content": "Las letras mayúsculas se usan al comenzar una oración o para nombres propios."
+            },
+            {
+                "type": "image",
+                "url": "/static/images/lessons/mayusculas.jpg",
+                "alt": "Letras mayúsculas del alfabeto",
+                "description": "Imagen con todas las letras mayúsculas"
+            },
+            {
+                "type": "interactive",
+                "content": "Practica las letras mayúsculas en el pizarrón",
+                "hint": "Presta atención a la dirección de los trazos"
+            }
+        ],
+        "quiz": [
+            {
+                "id": 1,
+                "question": "¿Cuándo se usan las letras mayúsculas?",
+                "options": ["Solo los lunes", "Al comenzar oraciones", "Nunca", "Solo en títulos"],
+                "correct_answer": "Al comenzar oraciones"
+            }
+        ]
+    },
+    {
+        "id": 13,
+        "title": "Letras Minúsculas",
+        "description": "Aprende a escribir las letras minúsculas",
+        "icon": "font",
+        "category": "Escritura",
+        "content": [
+            {
+                "type": "text",
+                "content": "Las letras minúsculas se usan en la mayoría de las palabras. Son más frecuentes que las mayúsculas."
+            },
+            {
+                "type": "image",
+                "url": "/static/images/lessons/minusculas.jpg",
+                "alt": "Letras minúsculas del alfabeto",
+                "description": "Imagen con todas las letras minúsculas"
+            },
+            {
+                "type": "interactive",
+                "content": "Practica las letras minúsculas en el pizarrón",
+                "hint": "Observa bien las diferencias con las mayúsculas"
+            }
+        ],
+        "quiz": [
+            {
+                "id": 1,
+                "question": "¿Qué letras se usan más frecuentemente?",
+                "options": ["Mayúsculas", "Minúsculas", "Números", "Símbolos"],
+                "correct_answer": "Minúsculas"
+            }
+        ]
+    },
+    {
+        "id": 14,
+        "title": "Palabras Cortas",
+        "description": "Aprende a escribir palabras sencillas",
+        "icon": "pen",
+        "category": "Escritura",
+        "content": [
+            {
+                "type": "text",
+                "content": "Comienza con palabras cortas de 2-3 letras. Practica hasta que te salgan con facilidad."
+            },
+            {
+                "type": "image",
+                "url": "/static/images/lessons/palabras-cortas.jpg",
+                "alt": "Ejemplos de palabras cortas",
+                "description": "Imagen con palabras como sol, pan, luz, mar"
+            },
+            {
+                "type": "interactive",
+                "content": "Practica escribiendo palabras cortas en el pizarrón",
+                "hint": "Separa las letras correctamente"
+            }
+        ],
+        "quiz": [
+            {
+                "id": 1,
+                "question": "¿Cuál es una palabra corta?",
+                "options": ["Electrodoméstico", "Sol", "Paralelepípedo", "Aeropuerto"],
+                "correct_answer": "Sol"
+            }
+        ]
+    },
+    {
+        "id": 15,
+        "title": "Tu Nombre",
+        "description": "Aprende a escribir tu propio nombre",
+        "icon": "signature",
+        "category": "Escritura",
+        "content": [
+            {
+                "type": "text",
+                "content": "Tu nombre es una de las palabras más importantes que debes aprender a escribir."
+            },
+            {
+                "type": "interactive",
+                "content": "Practica escribiendo tu nombre en el pizarrón",
+                "hint": "Comienza con mayúscula y sigue con minúsculas"
+            }
+        ],
+        "quiz": [
+            {
+                "id": 1,
+                "question": "¿Cómo debe comenzar tu nombre?",
+                "options": ["Con minúscula", "Con mayúscula", "Con número", "Con símbolo"],
+                "correct_answer": "Con mayúscula"
             }
         ]
     }
