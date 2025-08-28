@@ -293,8 +293,10 @@ footer.bg-light {
 /* Debug temporal - ver bordes */
 .navbar {
     border: 2px solid red !important;
+    color: ecf0f1;
 }
 
 footer {
     border: 2px solid blue !important;
+       color: ecf0f1;
 }
