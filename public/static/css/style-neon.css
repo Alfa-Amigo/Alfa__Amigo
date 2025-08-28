@@ -288,3 +288,13 @@ footer p {
 footer.bg-light {
     background: none !important;
 }
+
+
+/* Debug temporal - ver bordes */
+.navbar {
+    border: 2px solid red !important;
+}
+
+footer {
+    border: 2px solid blue !important;
+}
