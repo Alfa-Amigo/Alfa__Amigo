@@ -300,3 +300,20 @@ footer {
     border: 2px solid blue !important;
        color: ecf0f1;
 }
+/* Estilos para el pizarrón en modo niños */
+body.version-kids .btn-warning {
+    background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%) !important;
+    border: none;
+    color: white;
+}
+
+body.version-kids .btn-outline-warning {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+
+body.version-kids .btn-outline-warning:hover {
+    background: #ff6b6b;
+    color: white;
+}
+
