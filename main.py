@@ -185,6 +185,20 @@ def logout():
     session.pop('user', None)
     session.pop('version', None)
     return redirect(url_for('login'))
+@app.route('/writing_practice/<int:lesson_id>')
+def writing_practice(lesson_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    lesson = next((l for l in lessons if l.get('id') == lesson_id), None)
+    if not lesson:
+        return redirect(url_for('index'))
+    
+    # Verificar si es una lección de escritura
+    if lesson.get('category') != 'Escritura':
+        return redirect(url_for('lesson_detail', lesson_id=lesson_id))
+    
+    return render_template('writing_practice.html', lesson=lesson)
 
 # Configuración para producción
 if __name__ == '__main__':
