@@ -21,7 +21,9 @@
         <div class="card-body">
             <div class="instruction-section bg-light p-3 rounded mb-4">
                 <h4><i class="fas fa-info-circle me-2"></i> Instrucciones</h4>
-                <p class="mb-0">Usa las herramientas de abajo para practicar la escritura. Selecciona una letra o palabra guía y traza sobre ella con el mouse o con tu dedo.</p>
+                <p class="mb-0" id="practiceInstructions">
+                    Usa las herramientas de abajo para practicar la escritura. Selecciona una letra o palabra guía y traza sobre ella con el mouse o con tu dedo.
+                </p>
             </div>
             
             <div class="paint-container border rounded">
@@ -67,14 +69,8 @@
                     <canvas id="guideOverlay" class="guide-overlay position-absolute top-0 start-0 w-100 h-100"></canvas>
                 </div>
                 
-                <div class="word-guides p-3 bg-light">
-                    <span class="fw-bold me-2">Practicar:</span>
-                    <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="A">Letra A</button>
-                    <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="B">Letra B</button>
-                    <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="C">Letra C</button>
-                    <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="M">Letra M</button>
-                    <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="Hola">Palabra: Hola</button>
-                    <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="Mama">Palabra: Mamá</button>
+                <div class="word-guides p-3 bg-light" id="practiceOptions">
+                    <!-- Las opciones se cargarán dinámicamente según el tipo de lección -->
                 </div>
             </div>
             
@@ -157,6 +153,18 @@
         touch-action: none;
     }
     
+    .practice-section {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .practice-section h6 {
+        border-bottom: 2px solid #4e73df;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        color: #4e73df;
+    }
+    
     /* Estilos para modo niños */
     body.version-kids .paint-container {
         border-color: #ffc107;
@@ -165,6 +173,11 @@
     body.version-kids .paint-header {
         background: #fff3cd !important;
         color: #856404;
+    }
+    
+    body.version-kids .practice-section h6 {
+        border-color: #ff6b6b;
+        color: #ff6b6b;
     }
 </style>
 
@@ -175,6 +188,33 @@
         const ctx = canvas.getContext('2d');
         const guideCtx = guideCanvas.getContext('2d');
         const container = document.querySelector('.canvas-container');
+        const practiceOptions = document.getElementById('practiceOptions');
+        const instructions = document.getElementById('practiceInstructions');
+        
+        // Determinar el tipo de práctica basado en el título de la lección
+        const lessonTitle = "{{ lesson.title }}";
+        let practiceType = 'general';
+        let currentWord = 'A';
+        
+        if (lessonTitle.includes('Primeros Trazos') || lessonTitle.includes('Trazos')) {
+            practiceType = 'trazos';
+            instructions.innerHTML = 'Practica los trazos básicos de escritura. Comienza con líneas rectas y luego avanza a curvas.';
+        } else if (lessonTitle.includes('Mayúsculas') || lessonTitle.includes('Mayusculas')) {
+            practiceType = 'mayusculas';
+            instructions.innerHTML = 'Practica las letras mayúsculas. Recuerda que se usan al comenzar una oración o para nombres propios.';
+        } else if (lessonTitle.includes('Minúsculas') || lessonTitle.includes('Minusculas')) {
+            practiceType = 'minusculas';
+            instructions.innerHTML = 'Practica las letras minúsculas. Son las más usadas en la escritura cotidiana.';
+        } else if (lessonTitle.includes('Palabras Cortas') || lessonTitle.includes('Palabras')) {
+            practiceType = 'palabras';
+            instructions.innerHTML = 'Practica escribiendo palabras cortas. Separa correctamente las letras.';
+        } else if (lessonTitle.includes('Nombre') || lessonTitle.includes('Tu Nombre')) {
+            practiceType = 'nombre';
+            instructions.innerHTML = 'Practica escribiendo tu nombre. Comienza con mayúscula y sigue con minúsculas.';
+        }
+        
+        // Cargar opciones de práctica según el tipo
+        loadPracticeOptions(practiceType);
         
         // Ajustar tamaño de los canvas al contenedor
         function resizeCanvases() {
@@ -200,12 +240,160 @@
         let brushSize = 5;
         let currentTool = 'brush';
         let guidesVisible = true;
-        let currentWord = 'A';
+        
+        // Cargar opciones de práctica según el tipo
+        function loadPracticeOptions(type) {
+            practiceOptions.innerHTML = '';
+            
+            switch(type) {
+                case 'trazos':
+                    practiceOptions.innerHTML = `
+                        <div class="practice-section">
+                            <h6>Líneas Básicas</h6>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="|">Línea Vertical</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="—">Línea Horizontal</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="/">Diagonal Derecha</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="\\">Diagonal Izquierda</button>
+                        </div>
+                        <div class="practice-section">
+                            <h6>Curvas Básicas</h6>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="C">Curva Abierta</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="O">Círculo</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="U">Curva Cerrada</button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'mayusculas':
+                    practiceOptions.innerHTML = `
+                        <div class="practice-section">
+                            <h6>Letras Mayúsculas</h6>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="A">A</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="B">B</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="C">C</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="D">D</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="E">E</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="F">F</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="G">G</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="H">H</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="I">I</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="J">J</button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'minusculas':
+                    practiceOptions.innerHTML = `
+                        <div class="practice-section">
+                            <h6>Letras Minúsculas</h6>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="a">a</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="b">b</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="c">c</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="d">d</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="e">e</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="f">f</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="g">g</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="h">h</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="i">i</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="j">j</button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'palabras':
+                    practiceOptions.innerHTML = `
+                        <div class="practice-section">
+                            <h6>Palabras de 2 Letras</h6>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="la">la</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="el">el</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="si">sí</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="no">no</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="un">un</button>
+                        </div>
+                        <div class="practice-section">
+                            <h6>Palabras de 3 Letras</h6>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="sol">sol</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="pan">pan</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="mar">mar</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="luz">luz</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="pez">pez</button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'nombre':
+                    practiceOptions.innerHTML = `
+                        <div class="practice-section">
+                            <h6>Practica tu Nombre</h6>
+                            <div class="d-flex align-items-center">
+                                <input type="text" id="userName" class="form-control me-2" placeholder="Escribe tu nombre" style="max-width: 200px;">
+                                <button class="btn btn-sm {% if version == 'kids' %}btn-warning{% else %}btn-primary{% endif %}" id="practiceName">
+                                    <i class="fas fa-play me-1"></i> Practicar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="practice-section">
+                            <h6>Nombres Comunes</h6>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="Ana">Ana</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="Luis">Luis</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="Rosa">Rosa</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="Juan">Juan</button>
+                            <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="Maria">María</button>
+                        </div>
+                    `;
+                    break;
+                    
+                default:
+                    practiceOptions.innerHTML = `
+                        <span class="fw-bold me-2">Practicar:</span>
+                        <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="A">Letra A</button>
+                        <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="B">Letra B</button>
+                        <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="C">Letra C</button>
+                        <button class="btn btn-sm {% if version == 'kids' %}btn-outline-warning{% else %}btn-outline-primary{% endif %} me-2 mb-2" data-word="Hola">Palabra: Hola</button>
+                    `;
+            }
+            
+            // Agregar event listeners a los botones
+            setTimeout(() => {
+                document.querySelectorAll('.word-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        currentWord = this.getAttribute('data-word');
+                        drawGuides(currentWord);
+                        
+                        // Resaltar botón seleccionado
+                        document.querySelectorAll('.word-btn').forEach(b => {
+                            b.classList.remove('{% if version == "kids" %}btn-warning{% else %}btn-primary{% endif %}');
+                            b.classList.add('{% if version == "kids" %}btn-outline-warning{% else %}btn-outline-primary{% endif %}');
+                        });
+                        this.classList.remove('{% if version == "kids" %}btn-outline-warning{% else %}btn-outline-primary{% endif %}');
+                        this.classList.add('{% if version == "kids" %}btn-warning{% else %}btn-primary{% endif %}');
+                    });
+                });
+                
+                // Event listener para el botón de practicar nombre
+                if (document.getElementById('practiceName')) {
+                    document.getElementById('practiceName').addEventListener('click', function() {
+                        const userName = document.getElementById('userName').value.trim();
+                        if (userName) {
+                            currentWord = userName;
+                            drawGuides(currentWord);
+                        } else {
+                            alert('Por favor, escribe tu nombre primero.');
+                        }
+                    });
+                }
+                
+                // Seleccionar el primer botón por defecto
+                const firstButton = practiceOptions.querySelector('.word-btn');
+                if (firstButton) {
+                    firstButton.click();
+                }
+            }, 100);
+        }
         
         // Inicializar
         resizeCanvases();
         window.addEventListener('resize', resizeCanvases);
-        drawGuides(currentWord);
         
         // Funciones de dibujo
         function startDrawing(e) {
@@ -277,9 +465,13 @@
             guideCtx.lineTo(guideCanvas.width, centerY + 40);
             guideCtx.stroke();
             
-            // Texto guía
+            // Texto guía - ajustar tamaño según longitud
+            let fontSize = 120;
+            if (word.length > 8) fontSize = 80;
+            if (word.length > 12) fontSize = 60;
+            
             guideCtx.fillStyle = 'rgba(78, 115, 223, 0.2)';
-            guideCtx.font = 'bold 120px Arial';
+            guideCtx.font = `bold ${fontSize}px Arial`;
             guideCtx.textAlign = 'center';
             guideCtx.textBaseline = 'middle';
             guideCtx.fillText(word, guideCanvas.width / 2, centerY);
@@ -336,22 +528,6 @@
         // Control de tamaño de pincel
         document.getElementById('brushSize').addEventListener('input', function() {
             brushSize = this.value;
-        });
-        
-        // Botones de palabras guía
-        document.querySelectorAll('.word-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                currentWord = this.getAttribute('data-word');
-                drawGuides(currentWord);
-                
-                // Resaltar botón seleccionado
-                document.querySelectorAll('.word-btn').forEach(b => {
-                    b.classList.remove('{% if version == "kids" %}btn-warning{% else %}btn-primary{% endif %}');
-                    b.classList.add('{% if version == "kids" %}btn-outline-warning{% else %}btn-outline-primary{% endif %}');
-                });
-                this.classList.remove('{% if version == "kids" %}btn-outline-warning{% else %}btn-outline-primary{% endif %}');
-                this.classList.add('{% if version == "kids" %}btn-warning{% else %}btn-primary{% endif %}');
-            });
         });
         
         // Toggle guías
