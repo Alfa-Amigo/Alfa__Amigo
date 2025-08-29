@@ -523,6 +523,12 @@
                 "type": "text",
                 "content": "Tu nombre es una de las palabras más importantes que debes aprender a escribir."
             },
+               {
+                "type": "image",
+                "url": "/static/images/lessons/nombre.jpg",
+                "alt": "tu nombre",
+                "description": "Imagen con ejemplos de nombres "
+            },
             {
                 "type": "interactive",
                 "content": "Practica escribiendo tu nombre en el pizarrón",
