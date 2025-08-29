@@ -13,7 +13,7 @@
     </nav>
 
     <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header {% if version == 'kids' %}bg-warning{% else %}bg-primary{% endif %} text-white">
             <h2 class="mb-0">
                 <i class="fas fa-{{ lesson.icon }} me-2"></i>{{ lesson.title }}
             </h2>
@@ -57,6 +57,14 @@
                     <div class="interactive-content p-3 bg-white rounded border">
                         <h5><i class="fas fa-hand-pointer me-2"></i>Practica</h5>
                         <p class="fs-4">{{ item.content }}</p>
+                        {% if lesson.category == "Escritura" %}
+                        <div class="mt-3">
+                            <a href="{{ url_for('writing_practice', lesson_id=lesson.id) }}" 
+                               class="btn {% if version == 'kids' %}btn-warning{% else %}btn-info{% endif %}">
+                                <i class="fas fa-pen me-1"></i> Abrir pizarrón de práctica
+                            </a>
+                        </div>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
@@ -69,6 +77,13 @@
         <a href="{{ url_for('quiz', lesson_id=lesson.id) }}" class="btn btn-primary btn-lg">
             <i class="fas fa-play me-2"></i> Realizar cuestionario
         </a>
+        
+        <!-- Botón de práctica de escritura para lecciones de escritura -->
+        {% if lesson.category == "Escritura" %}
+        <a href="{{ url_for('writing_practice', lesson_id=lesson.id) }}" class="btn {% if version == 'kids' %}btn-warning{% else %}btn-info{% endif %} btn-lg ms-2">
+            <i class="fas fa-pen me-2"></i> Practicar escritura
+        </a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
